@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/admin-assets/css/main.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/admin/css/header.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
+    <script src="https://kit.fontawesome.com/16d4885483.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+    <style>
+       
+    </style>
+
+    <!-- JavaScript for Dropdown Toggle -->
+    <script>
+        $(document).ready(function(){
+            $('#btn-message').click(function(event){
+                event.stopPropagation();
+                $('.sub-menu').toggleClass('show');
+            });
+            $(document).click(function(event) {
+                if (!$(event.target).closest('.dropdown').length) {
+                    $('.sub-menu').removeClass('show');
+                }
+            });
+        });
+    </script>
+</head>
+<body >
+    <!-- Navbar -->
+    <div class="navbar">
+        <h1>Admin Dashboard</h1>
+        <div class="navbar-right">
+            <li class="dropdown">
+                <button id="btn-message" class="button-message">
+                    <div class="content-avatar">
+                        <div class="avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    </div>
+                    <% if (locals.adminData) { %>
+                        <div class="notice-content">
+                            <div class="username"><%= adminData.name %></div>
+                            <div class="user-id"><%= adminData.email %></div>
+                        </div>
+                    <% } %>
+                </button>
+                <!-- Dropdown Menu -->
+                <ul class="sub-menu">
+                    <li><a href="/profile">Profile</a></li>
+                    <li><a href="/settings">Settings</a></li>
+                    
+                    <li><a href="/admin/logout">Logout</a></li>
+
+                </ul>
+            </li>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="container-fluid">
+        <div class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul>
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/users">Customers</a></li>
+                <li><a href="/admin/category">Category</a></li>
+                <li><a href="/admin/brands">Brand</a></li>
+                <li><a href="/admin/addProducts">Add Product</a></li>
+                <li><a href="/admin/products">Products</a></li>
+                <li><a href="/admin/Coupon">Coupon</a></li>
+                <li><a href="/admin/banner">Banner</a></li>
+                <li><a href="/admin/orders">Orders</a></li>
+            </ul>
+        </div>

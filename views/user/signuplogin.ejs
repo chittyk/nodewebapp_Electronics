@@ -1,0 +1,208 @@
+<%- include('../../views/partials/user/header') %>
+<br><br><br><br>
+
+    <title>Sign Up </title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Nunito Sans", sans-serif;
+        background-color: #f8f9fa;
+      }
+      .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .card-title {
+        font-weight: 700;
+        font-size: 1.5rem;
+      }
+      .form-control {
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
+      .btn-primary {
+        font-weight: 600;
+        border-radius: 8px;
+        background-color: #ff7f50;
+        border: none;
+      }
+      .btn-primary:hover {
+        background-color: #ff6347;
+      }
+      .is-invalid {
+        border-color: #dc3545;
+      }
+      .invalid-feedback {
+        font-size: 0.875rem;
+      }
+    </style>
+  
+  <body class="bg-secondary">
+    <div class=" container my-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="card p-4">
+            <div class="card-body">
+              <h3 class="card-title text-center mb-4">Sign Up</h3>
+              <form id="signupForm" action="/signup" method="post" novalidate>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    placeholder="Enter Name"
+                    required
+                  />
+                  <div class="invalid-feedback">Name is required.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email address</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    placeholder="Enter email"
+                    required
+                  />
+                  <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="phone" class="form-label">Phone Number</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    required
+                  />
+                  <div class="invalid-feedback">Phone number should contain only digits.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Password must be at least 8 characters long and contain both letters and numbers.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="confirm-password" class="form-label">Confirm Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="confirm-password"
+                    name="cpassword"
+                    placeholder="Confirm Password"
+                    required
+                  />
+                  <div class="invalid-feedback">Passwords do not match.</div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                <br><br>
+                <p style="margin-left: 230px;" class="mb-0">or log in with</p><br>
+                <div style="margin-left: 250px;" class="social-btns">
+                  <a href="/auth/google" class="btn btn-outline-danger">
+                    <i class="fab fa-google"></i>
+                  </a>
+                </div>
+
+                
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const signupForm = document.getElementById("signupForm");
+
+        // Helper function to check email format
+        function validateEmail(email) {
+          const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          return re.test(String(email).toLowerCase());
+        }
+
+        // Helper function to check phone number format
+        function validatePhone(phone) {
+          return /^\d+$/.test(phone);
+        }
+
+        // Helper function to check password complexity
+        function validatePassword(password) {
+          const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+          return re.test(password);
+        }
+
+        // Helper function to check password match
+        function validatePasswordMatch() {
+          const password = document.getElementById("password");
+          const confirmPassword = document.getElementById("confirm-password");
+          if (confirmPassword.value !== password.value) {
+            confirmPassword.classList.add("is-invalid");
+          } else {
+            confirmPassword.classList.remove("is-invalid");
+          }
+        }
+
+        // Live validation on input
+        signupForm.addEventListener("input", function (event) {
+          const target = event.target;
+          target.classList.remove("is-invalid");
+
+          if (!target.value) {
+            target.classList.add("is-invalid");
+          } else if (target.id === "email" && !validateEmail(target.value)) {
+            target.classList.add("is-invalid");
+          } else if (target.id === "phone" && !validatePhone(target.value)) {
+            target.classList.add("is-invalid");
+          } else if (target.id === "password" && !validatePassword(target.value)) {
+            target.classList.add("is-invalid");
+          } else if (target.id === "confirm-password") {
+            validatePasswordMatch();
+          }
+        });
+
+        // Final validation on submit
+        signupForm.addEventListener("submit", function (event) {
+          const inputs = signupForm.querySelectorAll("input");
+          let valid = true;
+
+          inputs.forEach((input) => {
+            if (!input.value) {
+              input.classList.add("is-invalid");
+              valid = false;
+            }
+          });
+
+          if (!valid) {
+            event.preventDefault();
+          }
+        });
+      });
+    </script>
+
+    
+<%- include('../../views/partials/user/footer') %>
+    
+  

@@ -1,0 +1,30 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container-fluid py-5 d-flex justify-content-center ms-5 shadow-lg align-items-center bg-light text-dark" style="min-height: 100vh; width: 100%;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 bg-secondary">
+                <div class="card-body p-5">
+                    <center><h3 class="card-title text-center mb-5 text-primary">Edit Category</h3></center>
+                    <form method="post" action="/admin/editCategory/<%= category._id %>">
+                        <div class="mb-4">
+                            <label for="categoryName" class="form-label fw-semibold text-light">Category Name</label>
+                            <input type="text" id="categoryName" name="categoryName" value="<%= category.name %>" class="form-control bg-light text-dark border-2 shadow-sm rounded-3 py-3 px-4" />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold text-light">Description</label>
+                            <textarea id="description" name="description" class="shadow-lg form-control bg-light text-dark border-2 shadow-sm rounded-3 py-3 px-4" rows="5"><%= category.description %></textarea>
+                        </div>
+                    
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg rounded-pill" type="submit">Update Category</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

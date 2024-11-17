@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/mystyle/css/otp.css">
+    <title>OTP Verification</title>
+</head>
+
+<body>
+    <div class="relative flex min-h-screen flex-col justify-center overflow-hidden py-12">
+        <div class="relative bg-white px-6 pt-10 pb-9 shadow-2xl mx-auto w-full max-w-lg rounded-2xl">
+            <div class="mx-auto flex w-full max-w-md flex-col space-y-7">
+                <div class="flex flex-col items-center justify-center text-center">
+                    <div class="font-semibold text-3xl">
+                        <p>OTP Verification</p>
+                    </div>
+                </div>
+
+                <div>
+                    <form class="otp-form" action="/verify-otp" method="post" onsubmit="return validateOtpForm()">
+                        <div class="flex flex-col space-y-6">
+                            <div class="flex flex-row items-center justify-between mx-auto w-full max-w-sm">
+                                <div id="countdown" class="text-center text-danger mb-3"></div> <!-- Countdown Timer -->
+                            </div>
+                            <div>
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
+                            </div>
+
+                            <div class="flex items-center flex-col space-y-5">
+                                <button
+                                    class="flex px-5 text-center border rounded-xl outline-none py-4 bg-blue-700 hover:bg-blue-800 border-none text-white text-md">
+                                    Verify OTP
+                                </button>
+                                <button type="button" onclick="resendOTP()" class="btn btn-link text-primary">Resend OTP</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let countdownDuration = 60; // Set countdown duration to 60 seconds
+        let timeRemaining = countdownDuration; // Initialize time remaining
+        const countdownElement = document.getElementById("countdown"); // Ensure this ID matches your HTML
+        let timerInterval;
+
+        function validateOtpForm() {
+            const otpInputs = document.querySelectorAll("input[name='otp[]']");
+            const otpArray = Array.from(otpInputs).map(input => input.value);
+
+            // Ensure all OTP fields are filled
+            if (otpArray.some(otp => otp === "")) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please enter all OTP digits!',
+                });
+                return false; // Prevent form submission
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/verify-otp",
+                data: { otp: otpArray },
+                success: function (response) {
+                    if (response.redirectUrl) {
+                        Swal.fire({
+                            icon: "success",
+                            title: 'OTP Verified Successfully',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then(() => {
+                            window.location.href = response.redirectUrl;
+                        });
+                    } else {
+                        handleStatusCode(response.status, response.message);
+                    }
+                },
+                error: function (xhr) {
+                    handleStatusCode(xhr.status, xhr.responseText);
+                }
+            });
+
+            return false; // Prevent default form submission
+        }
+
+        function handleStatusCode(statusCode, message) {
+            const titles = {
+                400: 'Invalid Request',
+                401: 'Unauthorized',
+                403: 'Forbidden',
+                404: 'Not Found',
+                500: 'Server Error'
+            };
+            const title = titles[statusCode] || 'Error';
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                text: message || 'An unexpected error occurred.',
+            });
+        }
+
+        function resendOTP() {
+            clearInterval(timerInterval); // Clear existing timer
+            timeRemaining = countdownDuration; // Reset the timer
+            startCountdown(); // Restart the countdown
+
+            $.ajax({
+                type: "POST",
+                url: '/resend-otp',
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "OTP Resent Successfully",
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred, try again."
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Unable to resend OTP. Please try again later."
+                    });
+                }
+            });
+        }
+
+        function startCountdown() {
+            countdownElement.innerText = formatTime(timeRemaining); // Display time
+            timerInterval = setInterval(() => {
+                timeRemaining -= 1; // Decrement time remaining
+                countdownElement.innerText = formatTime(timeRemaining); // Update display
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval); // Stop timer
+                    countdownElement.innerText = "OTP expired"; // Notify user
+                    // No need to disable resend button; it's always enabled
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'OTP Expired',
+                        text: 'Please request a new OTP.'
+                    });
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secondsLeft = seconds % 60;
+            return `${minutes}:${secondsLeft.toString().padStart(2, "0")}`; // Format time
+        }
+
+        window.onload = () => {
+            startCountdown(); // Start the countdown timer when the page loads
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+
+</html>

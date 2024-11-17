@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+
+  <!-- title -->
+  <title>Fruitkha - Slider Version</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <!-- favicon -->
+  <link rel="shortcut icon" type="image/png" href="assets/img/favicon.png">
+  <!-- google font -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+  <!-- fontawesome -->
+  <link rel="stylesheet" href="assets/css/all.min.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <!-- owl carousel -->
+  <link rel="stylesheet" href="assets/css/owl.carousel.css">
+  <!-- magnific popup -->
+  <link rel="stylesheet" href="assets/css/magnific-popup.css">
+  <!-- animate css -->
+  <link rel="stylesheet" href="assets/css/animate.css">
+  <!-- mean menu css -->
+  <link rel="stylesheet" href="assets/css/meanmenu.min.css">
+  <!-- main style -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="./user/css/maind134.css">
+
+  <!-- responsive -->
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <style>
+    nav.main-menu ul>li:hover ul {
+      color: white;
+      background-color: #2e2e2e;
+      margin-top: 25px;
+      opacity: 1;
+      visibility: visible;  
+      border-radius: 15 px;
+    }
+    
+
+
+
+
+
+    #btn-message {
+      --text-color: rgb(255, 255, 255);
+      --bg-color-sup: #5e5e5e;
+      --bg-color: #2b2b2b;
+      --bg-hover-color: #161616;
+      --online-status: #00da00;
+      --font-size: 16px;
+      --btn-transition: all 0.2s ease-out;
+    }
+
+    .button-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font: 400 var(--font-size) Helvetica Neue, sans-serif;
+      box-shadow: 0 0 2.17382px rgba(0, 0, 0, .049), 0 1.75px 6.01034px rgba(0, 0, 0, .07), 0 3.63px 14.4706px rgba(0, 0, 0, .091), 0 22px 48px rgba(0, 0, 0, .14);
+      background-color: var(--bg-color);
+      border-radius: 68px;
+      cursor: pointer;
+      padding: 6px 10px 6px 6px;
+      width: fit-content;
+      height: 40px;
+      border: 0;
+      overflow: hidden;
+      position: relative;
+      transition: var(--btn-transition);
+    }
+
+    .button-message:hover {
+      height: 56px;
+      padding: 8px 20px 8px 8px;
+      background-color: var(--bg-hover-color);
+      transition: var(--btn-transition);
+    }
+
+    .button-message:active {
+      transform: scale(0.99);
+    }
+
+    .content-avatar {
+      width: 30px;
+      height: 30px;
+      margin: 0;
+      transition: var(--btn-transition);
+      position: relative;
+    }
+
+    .button-message:hover .content-avatar {
+      width: 40px;
+      height: 40px;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: var(--bg-color-sup);
+    }
+
+    .user-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .status-user {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      right: 1px;
+      bottom: 1px;
+      border-radius: 50%;
+      outline: solid 2px var(--bg-color);
+      background-color: var(--online-status);
+      transition: var(--btn-transition);
+      animation: active-status 2s ease-in-out infinite;
+    }
+
+    .button-message:hover .status-user {
+      width: 10px;
+      height: 10px;
+      right: 1px;
+      bottom: 1px;
+      outline: solid 3px var(--bg-hover-color);
+    }
+
+    .notice-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding-left: 8px;
+      text-align: initial;
+      color: var(--text-color);
+    }
+
+    .username {
+      letter-spacing: -6px;
+      height: 0;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: var(--btn-transition);
+    }
+
+    .user-id {
+      font-size: 12px;
+      letter-spacing: -6px;
+      height: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: var(--btn-transition);
+    }
+
+    .lable-message {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transform: scaleY(1);
+      transition: var(--btn-transition);
+    }
+
+    .button-message:hover .username {
+      height: auto;
+      letter-spacing: normal;
+      opacity: 1;
+      transform: translateY(0);
+      transition: var(--btn-transition);
+    }
+
+    .button-message:hover .user-id {
+      height: auto;
+      letter-spacing: normal;
+      opacity: 1;
+      transform: translateY(0);
+      transition: var(--btn-transition);
+    }
+
+    .button-message:hover .lable-message {
+      height: 0;
+      transform: scaleY(0);
+      transition: var(--btn-transition);
+    }
+
+    .lable-message,
+    .username {
+      font-weight: 600;
+    }
+
+    .number-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-left: 8px;
+      font-size: 12px;
+      width: 16px;
+      height: 16px;
+      background-color: var(--bg-color-sup);
+      border-radius: 20px;
+    }
+
+    /*==============================================*/
+    @keyframes active-status {
+      0% {
+        background-color: var(--online-status);
+      }
+
+      33.33% {
+        background-color: #93e200;
+      }
+
+      66.33% {
+        background-color: #93e200;
+      }
+
+      100% {
+        background-color: var(--online-status);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-secondary">
+
+  <!--PreLoader-->
+  <div class="loader">
+    <div class="loader-inner">
+      <div class="circle"></div>
+    </div>
+  </div>
+  <!--PreLoader Ends-->
+
+  <!-- header -->
+  <div class="top-header-area" id="sticker">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 col-sm-12 text-center">
+          <div class="main-menu-wrap">
+            <!-- logo -->
+            <div class="site-logo">
+              <a href="/">
+                <img style="width: 50px; height: 50px;" src="/mystyle/img/logo.png" alt="">
+              </a>
+            </div>
+            <!-- logo -->
+
+            <!-- menu start -->
+            <nav class="main-menu">
+              <ul>
+                <li class="current-list-item"><a href="/">Home</a>
+                  
+                </li>
+                <li><a href="about.html">About</a></li>
+               
+
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/shop">Shop</a>
+                  
+                </li>
+                <li>
+                  <div class="header-icons">
+
+                    <a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+                    <script>console.log(userData)</script>
+                  </div>
+                </li>
+                <li>
+                  <div class="header-icons">
+                    <a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+
+                    <script>console.log(userData)</script>
+                  </div>
+                </li>
+                <li>
+                  
+
+                    <% if (locals.userData) { %>
+                      <a style="" class="" href="/userProfile">
+
+                      <button  id="btn-message" class="button-message">
+                        <div class="content-avatar">
+                          <div class="status-user"></div>
+                          <div class="avatar">
+                            <svg class="user-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path
+                                d="M12,12.5c-3.04,0-5.5,1.73-5.5,3.5s2.46,3.5,5.5,3.5,5.5-1.73,5.5-3.5-2.46-3.5-5.5-3.5Zm0-.5c1.66,0,3-1.34,3-3s-1.34-3-3-3-3,1.34-3,3,1.34,3,3,3Z">
+                              </path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="notice-content">
+                          <div class="username">
+                            <%= userData.name %>
+                          </div>
+                          <div class="lable-message">
+                            <%= userData.name %>
+                          </div>
+                          <div class="user-id">
+                            <%= userData.email %>
+                          </div>
+                        </div>
+                      </button>
+                    </a>
+
+                      <% } else { %>
+                        <a style="" class="" href="/signLog">
+                        <button style=""  id="btn-message" class="button-message">
+                          <div class="content-avatar">
+                            <div class="status-user"></div>
+                            <div class="avatar">
+                              <svg class="user-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path
+                                  d="M12,12.5c-3.04,0-5.5,1.73-5.5,3.5s2.46,3.5,5.5,3.5,5.5-1.73,5.5-3.5-2.46-3.5-5.5-3.5Zm0-.5c1.66,0,3-1.34,3-3s-1.34-3-3-3-3,1.34-3,3,1.34,3,3,3Z">
+                                </path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="notice-content">
+                            <div class="username">
+                              Gust
+                            </div>
+                            <div class="lable-message">
+                              Gust
+                            </div>
+                            <div class="user-id">
+                              Login
+                            </div>
+                          </div>
+                        </button>
+                      </a>  
+                      
+                        <% } %>
+
+
+                  
+                  <br>
+                  <br>
+                  
+                    <ul style="margin-top: 40px;" class="sub-menu">
+                      <% if (locals.userData) { %>
+                        <li><a href="/logoutUser">logout</a></li>
+                      <% } else { %>
+                        <li><a href="/login">login</a></li>
+                        <li><a href="/signlog">signup</a></li>
+                      <% } %>
+                    </ul>
+                  
+                  
+                </li>
+
+              </ul>
+            </nav>
+            <a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+            <div class="mobile-menu"></div>
+            <!-- menu end -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end header -->

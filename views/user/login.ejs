@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <title>Login Page</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f8f9fa;
+    }
+    .login-card {
+      max-width: 800px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    .login-section {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .login-form {
+      flex: 1;
+      padding: 20px;
+      max-width: 50%;
+    }
+    .login-image {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      max-width: 50%;
+      background-color: #e9ecef;
+      border-radius: 0 10px 10px 0;
+    }
+    .login-image img {
+      max-width: 100%;
+      height: auto;
+    }
+    .social-btns a {
+      font-size: 1.5rem;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+    
+<br><br><br><br>
+
+  
+
+  <body style="margin-top: 100px;" class="bg-secondary">
+    <div class="container">
+      <div style="margin-left: 250px;" class="card login-card">
+        <div class="row g-0 login-section">
+          <div class="col-md-6 login-form">
+            <h3 class="card-title text-center">Log In</h3>
+            <form id="loginform" method="post" action="/login">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="email"
+                  placeholder="Enter email"
+                />
+                <div id="error1" class="error-message"></div>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  id="password"
+                  placeholder="Password"
+                />
+                <div id="error2" class="error-message"></div>
+              </div>
+              <% if (locals.message1 && message1.length > 0) { %>
+                <div class="alert alert-danger text-center">
+                  <%= message1 %>
+                </div>
+              <% } %>
+              <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary">Log In</button>
+                <p class="mb-0">or log in with</p>
+                <div class="social-btns">
+                  <a href="/auth/google" class="btn btn-outline-danger">
+                    <i class="fab fa-google"></i>
+                  </a>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-6 login-image">
+            <a href="/">
+              <img src="/mystyle/img/signup.png" alt="Shopping Site" />
+            </a>
+            <div class="mt-3">
+              <a href="/signLog" class="text-decoration-none">Not registered? Sign up</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const emailid = document.getElementById("email");
+      const passid = document.getElementById("password");
+      const error1 = document.getElementById("error1");
+      const error2 = document.getElementById("error2");
+      const loginform = document.getElementById("loginform");
+
+      function emailValidateChecking() {
+        const emailval = emailid.value;
+        const emailpattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+        if (!emailpattern.test(emailval)) {
+          error1.style.display = "block";
+          error1.innerHTML = "Invalid Format";
+        } else {
+          error1.style.display = "none";
+        }
+      }
+
+      function passValidateChecking() {
+        const passval = passid.value;
+        if (passval.length < 8) {
+          error2.style.display = "block";
+          error2.innerHTML = "Should contain at least 8 characters";
+        } else {
+          error2.style.display = "none";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loginform.addEventListener("submit", function (e) {
+          emailValidateChecking();
+          passValidateChecking();
+          if (error1.innerHTML || error2.innerHTML) {
+            e.preventDefault();
+          }
+        });
+      });
+    </script>
+  </body>
+</div>
+
+
+
+</body>
+</html>

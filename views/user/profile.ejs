@@ -1,0 +1,194 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+  .card-green {
+    background-color: #ADD8E6;
+  }
+
+  .dashboard-menu {
+    background-color: #cce3e6;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .breadcrumb-wrap {
+    background-color: #eee2e9;
+    padding: 15px 0;
+  }
+
+  .breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: #0056b3;
+  }
+
+  .required {
+    color: red;
+  }
+</style>
+
+<main  class="bg-secondary main py-4">
+  
+<br><br><br><br><br><br>
+  <section  class="bg-secondary py-5">
+    <div class="container ">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="dashboard-menu">
+            <ul class="nav flex-column" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab">
+                  <i class="bi bi-gear-fill me-2"></i>Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab">
+                  <i class="bi bi-geo-alt-fill me-2"></i>My Address
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab">
+                  <i class="bi bi-bag-fill me-2"></i>Orders
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="wallet-status-tab" data-bs-toggle="tab" href="#wallet-status" role="tab">
+                  <i class="bi bi-wallet-fill me-2"></i>Wallet Status
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/logoutUser">
+                  <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-9">
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+              <div class="card card-green">
+                <div class="card-header text-center">
+                  <h5 class="mb-0">User Profile</h5>
+                </div>
+                <div class="card-body text-center">
+                  <p><strong>Name:</strong> <%= userData.name %></p>
+                  <p><strong>Phone:</strong> <%= userData.phone %></p>
+                  <p><strong>Email:</strong> <%= userData.email %></p>
+                  <a href="/change-email" class="btn btn-sm btn-primary me-2">Change Email</a>
+                  <a href="/change-password" class="btn btn-sm btn-secondary">Change Password</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="address" role="tabpanel">
+              <div class="row">
+                <% if (userAddress) { %>
+                <% userAddress.address.forEach((address) => { %>
+                  
+                 
+                
+                <div class="col-lg-6">
+                  <div class="card mb-3">
+                    <div class="card-header">
+                      <h5 class="mb-0"><%= address.addressType %></h5>
+                    </div>
+                    <div class="card-body">
+                      <address>
+                        <strong>Name:</strong><%= address.name %> <br>
+                        <strong>City:</strong><%= address.city %> <br>
+                        <strong>LandMark:</strong><%= address.landMark%> <br>
+                        <strong>State:</strong><%= address.state  %> <br>
+
+                      </address>
+                      <p><strong>Pincode:</strong><%= address.pincode  %></p>
+                      <p><strong>Phone:</strong><%= address.phone  %></p>
+                      <p><strong>altPhone:</strong><%= address.altPhone  %></p>
+                      <div class="d-flex justify-content-between">
+                        <a href="editAddress?id=<%= address._id %>" class="btn btn-link">Edit</a>
+                        <a href="deleteAddress?id=<%= address._id %>" class="btn btn-link" onclick="return confirm('Are you sure, to delete this address')">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% }) %>
+                <% }else{ %>
+                <div class="col-lg-6">
+                  <div class="card mb-3">
+                    <div class="card-header">
+                      <h5 class="mb-0">No Address</h5>
+                    </div>
+                    <div class="card-body">No address</div>
+                  </div>
+                </div>
+                <% } %>
+              </div>
+              <a href="/addAddress" class="btn btn-primary mt-3">Add address</a>
+            </div>
+
+            <div class="tab-pane fade" id="orders" role="tabpanel">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Your Orders</h5>
+                </div>
+                <div class="card-body">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Sample Order</td>
+                        <td>Pending</td>
+                        <td>$100</td>
+                        <td><a href="#" class="btn btn-link">View</a></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="wallet-status" role="tabpanel">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Wallet Status</h5>
+                </div>
+                <div class="card-body text-center">
+                  <form>
+                    <label for="walletAmount" class="h4">Amount</label>
+                    <p class="h3">$500</p>
+                    <button type="button" class="btn btn-success mt-2">Add Money</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="referrals" role="tabpanel">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Referrals</h5>
+                </div>
+                <div class="card-body">
+                  <p>Share this link to earn rewards:</p>
+                  <a href="#" class="text-primary">Referral Link</a>
+                  <p>Earned: ₹0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<%- include("../../views/partials/user/footer") %>

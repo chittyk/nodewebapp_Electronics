@@ -1,0 +1,57 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div style="    width: 1357px; margin-left: 250px;" class="container-fluid   my-5">
+  <div class="row mb-4">
+      <div class="col">
+          <h2 class="text-center">Banners</h2>
+      </div>
+  </div>
+
+  <div class="table-responsive">
+      <table class="table table-striped text-center align-middle">
+          <thead class="table-dark">
+              <tr>
+                  <th scope="col">Image</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Active</th>
+                  <th scope="col">Delete</th>
+              </tr>
+          </thead>
+          <tbody>
+              <% if (locals.data) { %>
+                <% for( let i = 0; i < data.length; i++ ) { %>
+                    <tr>
+                        <td><img src="/uploads/re-image/<%= data[i].image %>" style="height: 2rem; width: 3rem;" class="img-fluid rounded" alt="Item"></td>
+                        <td><%= data[i].title %></td>
+                        <td><%= data[i].description %></td>
+                        <td>
+                            <% if (data[i].startDate<Date.now() && data[i].endDate >Date.now()) { %>
+                                <span class="badge bg-success">Active</span>
+                            <% }else{ %>
+                            
+                            <span class="badge bg-danger">Inactive</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <a href="/admin/deleteBanner?id=<%= data[i]._id %>" class="text-danger" title="Remove"><i class="material-icons">delete</i></a>
+                        </td>
+                    </tr>
+                    
+                <% } %>
+                
+              <% }else{ %>
+                <h1><center>No Banners</center></h1>
+            <% } %>
+          </tbody>
+      </table>
+  </div>
+
+  <div class="text-center mt-4">
+      <a href="/admin/addBanner">
+          <button class="btn btn-primary" type="button">Add Banner</button>
+      </a>
+  </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

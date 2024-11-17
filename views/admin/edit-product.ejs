@@ -1,0 +1,248 @@
+<%- include("../../views/partials/admin/header") %>
+
+<head>
+    <style>
+        .thumbnails-container {
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            margin-right: 10px;
+        }
+
+        .input-upload {
+            position: relative;
+        }
+
+        .error-message {
+            color: red;
+            display: none;
+        }
+
+        .image-cropper {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .img-thumbnail {
+            max-width: 100%;
+            max-height: 300px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+</head>
+
+<section style="margin-left: 60px;" class="content-main bg-dark container-fluid">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <div class="content-header mb-4">
+                <h2 class="content-title text-white text-center">Edit Product</h2>
+            </div>
+            <div class="card bg-secondary shadow-sm">
+                <div class="card-body">
+                    <form method="post" action="/admin/editProduct/<%= product._id %>" enctype="multipart/form-data"
+                          onsubmit="return validateForm()">
+                        <div class="mb-3">
+                            <label for="product_name" class="form-label">Product Name</label>
+                            <input type="text" name="productName" value="<%= product.productName %>"
+                                   class="form-control" id="product_name">
+                            <div id="productName-error" class="error-message"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <select class="form-select" name="brand" id="brand">
+                                <% for (let i = 0; i < brand.length; i++) { %>
+                                    <option value="<%= brand[i].brandname %>" <%= product.brand === brand[i].brandname ? 'selected' : '' %>>
+                                        <%= brand[i].brandname %>
+                                    </option>
+                                <% } %>
+                            </select>
+                            <div id="brand-error" class="error-message"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descriptionData" class="form-label">Full Description</label>
+                            <textarea name="descriptionData" class="form-control" rows="4"
+                                      id="descriptionData"><%= product.description %></textarea>
+                            <div id="description-error" class="error-message"></div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="regularPrice" class="form-label">Regular Price</label>
+                                <input name="regularPrice" type="text" class="form-control"
+                                       value="<%= product.regularPrice %>" id="regularPrice" placeholder="$">
+                                <div id="regularPrice-error" class="error-message"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="salePrice" class="form-label">Sale Price</label>
+                                <input name="salePrice" type="text" class="form-control"
+                                       value="<%= product.salePrice %>" id="salePrice">
+                                <div id="salePrice-error" class="error-message"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input name="quantity" type="text" class="form-control"
+                                       value="<%= product.quantity %>" id="quantity">
+                                <div id="quantity-error" class="error-message"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <input name="color" type="text" class="form-control" value="<%= product.color %>"
+                                   id="color">
+                            <div id="color-error" class="error-message"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" name="category" id="category">
+                                <% for (let i = 0; i < cat.length; i++) { %>
+                                    <option value="<%= cat[i]._id %>">
+                                        <%= cat[i].name %>
+                                    </option>
+                                <% } %>
+                            </select>
+                            <div id="category-error" class="error-message"></div>
+                        </div>
+
+                        <div class="card bg-secondary mb-4">
+                            <div class="card-header">
+                                <h4>Choose Images</h4>
+                            </div>
+                            <% for (let i = 0; i < product.productImage.length; i++) { %>
+                                <div class="mb-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img class="rounded me-3" style="width: 60px; height: 60px;"
+                                             src="/uploads/re-image/<%= product.productImage[i] %>">
+                                        <input type="hidden" value="<%= product.productImage[i] %>"
+                                               id="imageData<%= i %>">
+                                        <i onclick="deleteSingleImage('<%= product.productImage[i] %>','<%=product._id%>')"
+                                           class="fas fa-times text-danger" style="cursor: pointer;"></i>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="input<%= i %>" class="form-label">Upload Image <%= i + 1 %></label>
+                                        <input class="form-control" type="file" name="images" id="input<%= i %>"
+                                               accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, <%= i %>)">
+                                        <div id="images-error<%= i %>" class="text-danger small mt-2"></div>
+                                    </div>
+
+                                    <div class="image-cropper">
+                                        <img src="" id="croppedImg<%= i %>" alt="Cropped Image" class="img-thumbnail">
+                                        <button type="button" id="saveButton<%= i %>"
+                                                class="btn btn-primary btn-sm mt-2">Save</button>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-primary btn-md" onclick="validateAndSubmit()" id="updatebtn"
+                                    type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<script>
+    function validateAndSubmit() {
+        if (validateForm()) {
+            document.forms[0].submit();
+        }
+    }
+
+    function validateForm() {
+        clearErrorMessages();
+        let isValid = true;
+        
+        const name = document.getElementsByName('productName')[0].value.trim();
+        const description = document.getElementsByName('descriptionData')[0].value.trim();
+        const quantity = parseInt(document.getElementsByName('quantity')[0].value);
+        const price = document.getElementsByName('regularPrice')[0].value;
+        const saleprice = document.getElementsByName('salePrice')[0].value;
+        const color = document.getElementsByName('color')[0].value.trim();
+
+        if (!name) {
+            displayErrorMessage('productName-error', 'Please enter a product name.');
+            isValid = false;
+        }
+        if (!description) {
+            displayErrorMessage('description-error', 'Please enter a product description.');
+            isValid = false;
+        }
+        if (isNaN(quantity) || quantity < 0) {
+            displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+            isValid = false;
+        }
+        if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+            displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+        if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+            displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
+            isValid = false;
+        }
+        if (!color) {
+            displayErrorMessage('color-error', 'Please enter a color.');
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    function displayErrorMessage(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    }
+
+    function clearErrorMessages() {
+        const errorElements = document.getElementsByClassName('error-message');
+        Array.from(errorElements).forEach(element => {
+            element.innerText = '';
+            element.style.display = 'none';
+        });
+    }
+
+    function viewImage(event, index) {
+        const input = event.target;
+        const reader = new FileReader();
+        
+        reader.onload = function () {
+            const image = document.getElementById(`croppedImg${index}`);
+            image.src = reader.result;
+            
+            const cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+            });
+
+            document.getElementById(`saveButton${index}`).onclick = () => {
+                cropper.getCroppedCanvas().toBlob(blob => {
+                    // Create an object URL for the cropped image
+                    const croppedUrl = URL.createObjectURL(blob);
+                    image.src = croppedUrl;
+                    cropper.destroy();
+                });
+            };
+            
+            document.querySelector(`#croppedImg${index}`).parentElement.style.display = "block";
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function deleteSingleImage(image, productId) {
+        // You can implement AJAX call here to delete the image on the server
+        alert(`Deleting image ${image} for product ${productId}`);
+    }
+</script>
+
+<%- include("../../views/partials/admin/footer") %>
