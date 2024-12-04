@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const {Schema} =mongoose
-const {v4:uuidv4}=require('uuid');
+const {v4:uuidv4, stringify}=require('uuid');
 
 const orderSchema = new Schema({
     orderId:{
@@ -8,6 +8,11 @@ const orderSchema = new Schema({
         default:()=>uuidv4(),
         unique:true
 
+    },
+    userId:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+        required:true,   
     },
     orderedItems:[{
         product:{
@@ -47,7 +52,8 @@ const orderSchema = new Schema({
     status:{
         type:String,
         required:true,
-        enum:['pending','Processing','Shipped','Delivered','Cancelled','Return Request','Returned']
+        enum:['pending','Processing','Shipped','Delivered','Cancelled','Return Request','Returned'],
+        default:'pending'
     },
     createdOn:{
         type:Date,
@@ -57,7 +63,12 @@ const orderSchema = new Schema({
     couponApplied:{
         type:Boolean,
         default:false,
-    }
+    },
+    paymentMethod:{
+        type:String,
+        enum:['card','net-banking','upi','emi','cod'],
+        default:'cod'
+    },
 })
 
 

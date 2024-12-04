@@ -1,0 +1,322 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb5QH1ZqG1BTAk6Ey0jTkC4QiGDU48OxT7T29"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    </head>
+
+    <body>
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center">Order Management</h2><br>
+            </div>
+        </div><br>
+
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-10">
+                <input type="text" id="searchInput" class="form-control"
+                    placeholder="Search by Order ID, Customer Name, or Status..." onkeyup="searchOrders()">
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <!-- Table for Orders -->
+            <table class="table ms-5 table-bordered table-striped" id="ordersTable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User ID</th>
+                        <th>Customer Name</th>
+                        <th>Ordered Items</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Coupon Applied</th>
+                        <th>Date Ordered</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (result.length> 0) { %>
+                        <% for (let i=0; i < result.length; i++) { %>
+                            <tr>
+                                <td>
+                                    <%= result[i].orderId %>
+                                </td>
+                                <td>
+                                    <%= result[i].userId %>
+                                </td>
+                                <td>
+                                    <%= result[i].userName %>
+                                </td>
+                                <td>
+                                    <% result[i].orderedItems.forEach(items=> { %>
+                                        <ul>
+                                            <li>
+                                                <%= items.itemName %> <span class="text-success">(<%= items.itemQuantity
+                                                            %> units)</span> - ₹<%= items.itemPrice %>/- each
+                                            </li>
+                                        </ul>
+                                        <% }) %>
+                                </td>
+                                <td>₹<%= result[i].totalPrice %>
+                                </td>
+                                <td id="status-<%= result[i].orderId %>">
+                                    <span>
+                                        <%= result[i].status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= result[i].paymentMethod %>
+                                </td>
+                                <td>
+                                    <%= result[i].couponApplied %>
+                                </td>
+                                <td>
+                                    <%= new Date(result[i].createdOn).toLocaleDateString('en-US') %>
+                                        <%= new Date(result[i].createdOn).toLocaleTimeString('en-US') %>
+                                </td>
+                                <td>
+                                    <% if (result[i].status=='Cancelled' || result[i].status=='Returned' ) { %>
+                                        <button type="button" onclick="removeFromHistory('<%= result[i].orderId %>')"
+                                            class="btn btn-danger mt-2 btn-sm">Remove </button>
+                                        <% } else if (result[i].status=='Return Request' ) { %>
+                                            <button type="button"
+                                                onclick="changeStatus('Returned', '<%= result[i].orderId %>')"
+                                                class="btn bg-success mt-2 btn-sm">Return It</button>
+                                            <button type="button"
+                                                onclick="changeStatus('Delivered', '<%= result[i].orderId %>')"
+                                                class="btn bg-warning mt-2 btn-sm">Don't Return</button>
+                                            <% } else { %>
+                                                <button type="button"
+                                                    onclick="changeStatus('pending', '<%= result[i].orderId %>')"
+                                                    class="btn btn-warning mt-2 btn-sm">Pending</button>
+                                                <button type="button"
+                                                    onclick="changeStatus('Processing', '<%= result[i].orderId %>')"
+                                                    class="btn bg-secondary mt-2 btn-sm">Processing</button>
+                                                <button type="button"
+                                                    onclick="changeStatus('Shipped', '<%= result[i].orderId %>')"
+                                                    class="btn bg-success mt-2 btn-sm">Shipped</button>
+                                                <button type="button"
+                                                    onclick="changeStatus('Delivered', '<%= result[i].orderId %>')"
+                                                    class="btn bg-info mt-2 btn-sm">Delivered</button>
+                                                <button type="button"
+                                                    onclick="changeStatus('Cancelled', '<%= result[i].orderId %>')"
+                                                    class="btn btn-danger mt-2 btn-sm">Cancel</button>
+                                                <% } %>
+                                </td>
+                            </tr>
+                            <% } %>
+                                <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+            function removeFromHistory(orderId) {
+                console.log('orderId', orderId);
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You want to remove this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Remove it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+
+                        $.ajax({
+                            url: '/admin/removeFromHistory',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ orderId: orderId }),
+                            success: function (response) {
+                                // Check if the status update was successful
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Order Removed Successfully',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    });
+
+                                    // Optionally reload the page or dynamically remove the row
+                                    location.reload(); // For full page reload
+
+                                    // If you want to update the table dynamically, use the following (comment this if reloading the page):
+                                    // $('#orderRow' + orderId).remove(); // Assuming the row has an id like "orderRow12345"
+                                } else {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'warning',
+                                        title: 'Failed to remove order',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    });
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error details:', { xhr, status, error });
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: 'An error occurred. Please try again.',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                            }
+                        });
+                    }
+                });
+
+
+
+            }
+        </script>
+
+
+        <script>
+            // Function to handle changing status
+            function changeStatus(sta, orderId) {
+                console.log("Changing status for order:", orderId, "to:", sta);
+
+                $.ajax({
+                    url: '/admin/changeStatus', // Make sure this route exists on your backend
+                    method: 'POST',             // POST method
+                    contentType: 'application/json',
+                    data: JSON.stringify({ sta, orderId }), // Sending JSON data
+                    success: function (response) {
+                        // Check if the status update was successful
+                        if (response.success) {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Order status updated to ' + sta,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            // Update the status in the table dynamically
+                            location.reload()
+                        } else {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'warning',
+                                title: 'Failed to update order status',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error details:', { xhr, status, error });
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'An error occurred. Please try again.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                });
+            }
+
+            // Function to search orders in the table
+            function searchOrders() {
+                const input = document.getElementById('searchInput').value.toLowerCase();
+                const table = document.getElementById('ordersTable');
+                const rows = table.getElementsByTagName('tr');
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    const orderId = row.cells[0].textContent.toLowerCase();
+                    const customerName = row.cells[2].textContent.toLowerCase();
+                    const status = row.cells[5].textContent.toLowerCase();
+
+                    if (
+                        orderId.includes(input) ||
+                        customerName.includes(input) ||
+                        status.includes(input)
+                    ) {
+                        row.style.display = '';  // Show the row
+                    } else {
+                        row.style.display = 'none';  // Hide the row
+                    }
+                }
+            }
+        </script>
+
+        <%- include("../../views/partials/admin/footer") %>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %>">Previous</a>
+                        </li>
+                    <% } %>
+
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>

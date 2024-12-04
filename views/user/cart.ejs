@@ -1,0 +1,365 @@
+<%- include("../../views/partials/user/header") %>
+
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h1,
+        h4 {
+            font-weight: 700;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: auto;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+
+        .cart-item-details {
+            flex-grow: 1;
+        }
+
+        .cart-item-actions {
+            text-align: right;
+        }
+
+        .quantity-control {
+            width: 60px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .btn-remove {
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-remove:hover {
+            text-decoration: underline;
+        }
+
+        #select-all {
+            margin-right: 10px;
+        }
+
+        .total-item-price {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .text-info {
+            color: #17a2b8;
+        }
+    </style>
+
+    <br><br><br><br><br>
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> <a href="/shop" rel="nofollow">shop</a>
+                <span></span><a href="/detailProduct" rel="nofollow">product details</a>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Cart Items Section -->
+            <div class="col-lg-8">
+                <div id="cart-items" class="border rounded p-3 shadow bg-white">
+                    <!-- Header with "Select All" -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-success">Cart Items</h4>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="select-all">
+                            <label class="form-check-label" for="select-all">Select All</label>
+                        </div>
+                    </div>
+
+                    <!-- Cart Item List -->
+                    <div id="cart-item-list">
+                        <% if (locals.cart && locals.cart.items.length>0 ) { %>
+
+
+                            <% for (let i=0; i < cart.items.length; i++) { %>
+                                <div class="cart-item d-flex align-items-center mb-3 border rounded p-2 bg-light">
+                                    <!-- Checkbox -->
+                                    <div class="form-check me-3 align-self-start">
+                                        <input type="checkbox" value="<%= product[i]._id %>" class="form-check-input item-select"
+                                            data-index="<%= i %>">
+                                    </div>
+
+                                    <!-- Product Image -->
+                                    <div class="me-3">
+                                        <img src="/uploads/product-images/<%= product[i].productImage[0] %>"
+                                            alt="<%= product[i].productName %>" class="img-thumbnail"
+                                            style="width: 100px; height: 100px;">
+                                    </div>
+
+                                    <!-- Product Details -->
+                                    <div class="cart-item-details flex-grow-1">
+                                        <h5 class="text-info mb-1">
+                                            <%= product[i].productName %>
+                                        </h5>
+                                        <p class="text-muted mb-1">Price: ₹ <%= product[i].salePrice %>
+                                        </p>
+                                        <div class="d-flex align-items-center">
+                                            <label for="quantity-<%= i %>" class="me-2 mb-0">Qty:</label>
+                                            <input id="quantity-<%= i %>" type="number"
+                                                class="quantity-control form-control w-auto"
+                                                value="<%= cart.items[i].quantity %>" min="1" max="5"
+                                                data-index="<%= i %>">
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Total and Remove Button -->
+                                    <div class="cart-item-actions text-end">
+                                        <p class="text-success mb-2 total-item-price" id="total-item-price-<%= i %>"
+                                            data-price="<%= product[i].salePrice %>">
+                                            Total: ₹ <%= cart.items[i].quantity * product[i].salePrice %>
+                                        </p>
+                                        <a onclick="return removeProduct('<%= product[i]._id %>')"
+                                            class="btn-remove text-danger" data-index="<%= i %>">
+                                            Remove
+                                        </a>
+                                    </div>
+                                </div>
+                                <% } %>
+                                    <% } else { %>
+                                        <div class="text-danger">
+                                            <h2>No Product in cart</h2>
+                                        </div>
+                                        <% } %>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="col-lg-4">
+                <div class="border rounded p-3 shadow bg-white">
+                    <h4 class="text-warning">Order Summary</h4>
+                    <p class="mt-3"><strong>Items:</strong> <span id="item-count"></span></p>
+                    <p><strong>Total Price:</strong> ₹<span id="total-price"></span></p>
+                    <button class="btn btn-warning w-100 mt-3 text-white shadow" type="submit" onclick="validateCart()"
+                        id="proceed-checkout">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br><br><br>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+       function validateCart() {
+    const selectedItems = [];
+
+    // Loop through all the cart items
+    document.querySelectorAll('.cart-item').forEach((cartItem, index) => {
+        const checkbox = cartItem.querySelector('.item-select');
+        const quantityInput = cartItem.querySelector('.quantity-control');
+
+        // If the checkbox is checked, add the index, quantity, and product ID to the selectedItems array
+        if (checkbox.checked) {
+            const productIds = checkbox.value; // The value of the checkbox (product ID)
+            const quantity = quantityInput.value; // The quantity selected by the user
+
+            selectedItems.push({ index, quantity, productIds });
+
+            // Log the index, product ID, and quantity of the selected product
+            console.log(`Selected Product Index: ${index}, Product ID: ${productIds}, Quantity: ${quantity}`);
+        }
+    });
+
+    // Optionally, if no items are selected, log a message
+    if (selectedItems.length === 0) {
+        console.log('No products selected.');
+    } else {
+        // You can perform any further operations here with the selectedItems array
+        console.log('Selected items:', selectedItems);
+    }
+}
+
+    </script>
+
+    <script>
+        document.querySelectorAll('.quantity-control').forEach(input => {
+            input.addEventListener('change', function () {
+                let quantity = parseInt(this.value, 10);
+
+                // Check if quantity is less than 1
+                if (quantity < 1) {
+                    alert("Quantity must be at least 1.");
+                    this.value = 1;
+                }
+
+                // Check if quantity exceeds the stock or the max limit of 5
+                if (quantity > stock[this.dataset.index] || quantity > 5) {
+                    alert("Quantity cannot exceed 5.");
+                    this.value = 5;
+                }
+
+                renderCart();
+            });
+        });
+
+    </script>
+    <script>
+        function removeProduct(productId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Are you sure to remove product from cart!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Remove it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/removeProduct',
+                        method: 'POST',
+                        data: { productId: productId },
+                        success: (response) => {
+                            if (response.status) {
+                                $('#total-item-price-' + response.productId).closest('.cart-item').remove();
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "Your product has been removed from the cart.",
+                                    icon: "success",
+                                    timer: 2000
+                                });
+                                location.reload();
+                            } else {
+                                Swal.fire({
+                                    title: "Error",
+                                    text: "Error in removing product from cart.",
+                                    icon: "error",
+                                    timer: 2000
+                                });
+                            }
+                        },
+                        error: () => {
+                            Swal.fire({
+                                title: "Error",
+                                text: "An unexpected error occurred.",
+                                icon: "error",
+                                timer: 2000
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        const stock = <%= JSON.stringify(stock) %>;
+
+        // Function to update the total price of an individual item
+        const updateItemTotal = (cartItem, itemPrice) => {
+            const quantityInput = cartItem.querySelector('.quantity-control');
+            const quantity = parseInt(quantityInput.value, 10);
+            const totalItemPriceElement = cartItem.querySelector('.total-item-price');
+            const totalPrice = quantity * itemPrice;
+
+            // Update the total price for the item
+            totalItemPriceElement.textContent = `Total: ₹ ${totalPrice.toFixed(2)}`;
+            totalItemPriceElement.dataset.price = itemPrice;
+        };
+
+        // Function to update the cart summary
+        const renderCart = () => {
+            let totalItems = 0;
+            let totalCost = 0;
+
+            document.querySelectorAll('.cart-item').forEach((cartItem) => {
+                const quantityInput = cartItem.querySelector('.quantity-control');
+                const checkbox = cartItem.querySelector('.item-select');
+                const quantity = parseInt(quantityInput.value, 10);
+                const itemPrice = parseFloat(cartItem.querySelector('.total-item-price').dataset.price);
+
+                if (checkbox.checked) {
+                    totalItems += quantity;
+                    totalCost += quantity * itemPrice;
+                }
+            });
+
+            document.getElementById('item-count').textContent = totalItems;
+            document.getElementById('total-price').textContent = totalCost.toFixed(2);
+            document.getElementById('proceed-checkout').disabled = totalItems === 0;
+        };
+
+        document.getElementById('select-all').addEventListener('change', function () {
+            const allCheckboxes = document.querySelectorAll('.item-select');
+            allCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            renderCart();
+        });
+
+        document.querySelectorAll('.item-select').forEach(checkbox => {
+            checkbox.addEventListener('change', renderCart);
+        });
+
+        document.querySelectorAll('.quantity-control').forEach(input => {
+            input.addEventListener('change', function () {
+                const quantity = parseInt(this.value, 10);
+                const cartItem = this.closest('.cart-item');
+                const itemPrice = parseFloat(cartItem.querySelector('.total-item-price').dataset.price);
+
+                if (quantity < 1) {
+                    alert("Quantity must be at least 1.");
+                    this.value = 1;
+                }
+                if (quantity > stock) {
+                    alert("Quantity exceeds stock.");
+                    this.value = stock;
+                }
+
+                updateItemTotal(cartItem, itemPrice);
+                renderCart();
+            });
+        });
+
+        document.getElementById('proceed-checkout').addEventListener('click', function () {
+            const selectedItems = [];
+            document.querySelectorAll('.cart-item').forEach(cartItem => {
+                const checkbox = cartItem.querySelector('.item-select');
+                if (checkbox.checked) {
+                    const productIds= checkbox.value
+                    const productId = checkbox.dataset.index;
+                    const quantity = cartItem.querySelector('.quantity-control').value;
+                    selectedItems.push({ productId, quantity ,productIds });
+                }
+            });
+
+            if (selectedItems.length > 0) {
+                location.href = `/checkout?items=${JSON.stringify(selectedItems)}`;
+            } else {
+                alert("No items selected for checkout.");
+            }
+        });
+
+        renderCart();
+    </script>
+
+    <%- include("../../views/partials/user/footer") %>

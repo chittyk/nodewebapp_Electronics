@@ -172,6 +172,7 @@ const addProductOffer = async (req, res) => {
 
         // Calculate the sale price and apply the product offer
         findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.salePrice =findProduct.salePrice.toFixed(2)
         findProduct.productOffer = parseInt(percentage, 10);
 
         // Save the updated product and reset category offer
@@ -209,6 +210,7 @@ const removeProductOffer = async (req, res) => {
 
         // Calculate the original price and remove offer
         product.salePrice = product.salePrice / (1 - offerPercentage / 100);
+        product.salePrice=product.salePrice.toFixed(2)
         console.log("Recalculated sale price to original:", product.salePrice); // Step 4: Log recalculated price
         product.productOffer = 0;
 
@@ -287,8 +289,11 @@ const editProduct = async (req, res) => {
             brand: data.brand,
             category: data.category,
             regularPrice: data.regularPrice,
+            salePrice:data.salePrice,
             //size: data.size,
             color: data.color,
+            quantity:data.quantity,
+            productImage:data.productImage,
         };
         console.log("data \n",data)
 
@@ -325,6 +330,9 @@ const deleteSingleImage = async (req, res) => {
         res.redirect('/admin/pageNotFound');
     }
 };
+
+
+
 
 module.exports = {
     getProductAddpage,

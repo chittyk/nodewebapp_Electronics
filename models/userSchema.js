@@ -13,15 +13,12 @@ const userSchema = new Schema({
     },
     phone: {
         type: String,
-        required: false,
-        unique: false,
-        sparse: true,
         default: null,
     },
     googleId: {
-        type: String,
-        unique: true,
-    },
+        type: String,  // Ensure googleId is unique
+        default: null, // Allow googleId to be null
+      },
     password: {
         type: String,
         required: false,
@@ -36,15 +33,19 @@ const userSchema = new Schema({
     },
     cart: [{
         type: Schema.Types.ObjectId,
-        ref: "Cart",
+        ref: 'Cart', // Ensure you have a Cart schema
+    }],
+    wishlist: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Product', // Assuming products are added to the wishlist
     }],
     wallet: [{
         type: Schema.Types.ObjectId,
-        ref: 'Wishlist',
+        ref: 'Wallet', // Assuming a Wallet schema exists
     }],
     orderHistory: [{
         type: Schema.Types.ObjectId,
-        ref: 'Order',  // Corrected reference
+        ref: 'Order', // Ensure you have an Order schema
     }],
     createdOn: {
         type: Date,
@@ -55,7 +56,7 @@ const userSchema = new Schema({
     },
     redeemed: {
         type: Boolean,
-        //default: false,  // Added default value
+        default: false,
     },
     redeemedUsers: [{
         type: Schema.Types.ObjectId,
@@ -64,7 +65,7 @@ const userSchema = new Schema({
     searchHistory: [{
         category: {
             type: Schema.Types.ObjectId,
-            ref: 'Category',
+            ref: 'Category', // Ensure you have a Category schema
         },
         brand: {
             type: String,

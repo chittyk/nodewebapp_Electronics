@@ -41,20 +41,20 @@ const customerInfo = async (req, res) => {
         console.log('Error in customer management:', error);
     }
 };
-
-const blockCustomer=async (req,res)=>{
+const blockCustomer = async (req, res) => {
+    console.log('Executing blockCustomer controller...');
     try {
-        let id =req.query.id
-        console.log(req.session.admin)
-        console.log('id',id)
+        let id = req.query.userId;
+        console.log("Session details:", req.session.admin);
+        console.log('User ID:', id);
 
-        await User.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect("/admin/users")
+        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        res.redirect("/admin/users");
     } catch (error) {
-        console.log('error in blocking')
-        
+        console.log('Error in blocking:', error);
     }
-}
+};
+
 
 
 const unblockCustomer=async(req,res)=>{
@@ -74,4 +74,5 @@ module.exports = {
     customerInfo,
     unblockCustomer,
     blockCustomer,
+    
 };

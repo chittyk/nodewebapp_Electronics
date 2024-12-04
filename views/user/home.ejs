@@ -229,7 +229,7 @@
 	<!-- hero area -->
 
 
-	<section class="hero-slider container-fluid bg-secondary position-relative pt-10 pb-10">
+	<section class="hero-slider container-fluid bg-white position-relative pt-10 pb-10">
 		<div style="width: 100%;" class="swiper-container container-fluid  ">
 			<div style="" class=" swiper-wrapper">
 				<% banner.slice(0, 2).forEach(bannerItem=> { %>
@@ -358,9 +358,10 @@
 
 					<div class="col-md-3 col-sm-6">
 						<div class="white-box">
-							<div class="wishlist-icon">
-								<a href="javascript:void(0);"><img
-										src="https://static.thenounproject.com/png/635650-200.png" /></a>
+							<div class="wishlist-icon" onclick="addToWishlist('productData[i]._id')">
+																
+
+								<a href="javascript:void(0);" ><span class="wishlist-btn" onclick="addToWishlist( '<%= productData[i]._id %>' )">❤️</span></a>
 							</div>
 							<div class="product-img">
 								<% for( let j=0; j < productData[i].productImage.length; j++ ) { %>
@@ -386,7 +387,7 @@
 										<%= productData[i].productOffer %>% off
 									</span>
 								</div>
-								<a href="#" class="blue-btn">Add to cart</a>
+								<a  onclick=" ValidateCart('<%= productData._id %>')"  class="blue-btn">Add to cart</a>
 							</div>
 						</div>
 					</div>
@@ -449,6 +450,43 @@
 	<!-- end logo carousel -->
 
 	<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script>
+    function addToWishlist(productId) {
+      $.ajax({
+        url: '/addToWishlist',
+        method: 'POST',
+        data: {
+          productId: productId
+        },
+        success: (response) => { // Include 'response' to access server response
+          if (response.status) {
+            Swal.fire({
+              title: 'Added to Wishlist',
+              text: 'The product was successfully added to your wishlist.',
+              icon: 'success',
+              timer: 2000
+            });
+          } else {
+            Swal.fire({
+              icon: 'info',
+              title: 'Already in Wishlist',
+              text: response.message, // Use message from server response
+              timer: 2000
+            });
+          }
+        },
+        error: (xhr, status, error) => { // Include arguments for detailed error handling
+          Swal.fire({
+            title: 'Exist',
+            text:  'All ready in a wishlist',
+            icon: 'warning',
+            timer: 2000
+          });
+        }
+      });
+    }
+  </script>
 	<script>
 		var swiper = new Swiper('.swiper-container', {
 			slidesPerView: 1,
@@ -466,6 +504,52 @@
 				prevEl: '.swiper-button-prev',
 			},
 		});
+	</script>
+
+	<script>
+		function ValidateCart() {
+            console.log('Hello from ValidateCart function');
+             // Validate quantity
+            if (true) {
+                 // Use your product's ID
+                const quantity = 1; // Ensure quantity is a number
+
+                // AJAX call to add the product to the cart
+                $.ajax({
+                    url: '/cart', // Backend route to handle adding to the cart
+                    method: 'POST',
+                    contentType: 'application/json', // Set content type to JSON
+                    data: JSON.stringify({ productId, quantity }), // Send productId and quantity
+                    success: (response) => {
+                        if (response.status === 'success') {
+                            Swal.fire({
+                                title: 'Added to Cart',
+                                text: 'The product has been added to your cart successfully.',
+                                icon: 'success',
+                                timer: 2000,
+                            });
+                        }
+                        else {
+                            Swal.fire({
+                                title: 'error',
+                                text: response.message || 'Could not add to cart.',
+                                icon: 'error',
+                                timer: 2000,
+                            });
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: xhr.responseJSON?.message || 'An error occurred.',
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    },
+
+                });
+            }
+        }
 	</script>
 
 	<%- include('../../views/partials/user/footer') %>

@@ -1,4 +1,35 @@
+const Address = require('../models/addressSchema');
 const User = require('../models/userSchema');
+
+const cartAuth= async(req,res,next)=>{
+    try {
+        req.session.cart = {
+            cart:true
+        };
+        console.log('session ccarrtt tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',req.session.cart)
+        next()
+    } catch (error) {
+        console.log(error)
+        res.redirect('/')
+    }
+}
+
+const removeCartSession = async (req, res, next) => {
+    try {
+        if (req.session.cartData) {
+            delete req.session.cartData; // Remove the cart session
+            console.log('Cart session removed successfully.');
+            next(); // Proceed to the next middleware
+        } else {
+            console.log('No cart session found.');
+            return res.redirect('/'); // Render the "cart" view and terminate execution
+        }
+    } catch (error) {
+        console.error('Error in removeCartSession:', error);
+        next(error); // Pass the error to the error-handling middleware
+    }
+};
+
 
 const userAuth = (req, res, next) => {
     if (req.session.user) {
@@ -41,4 +72,6 @@ const adminAuth = (req, res, next) => {
 module.exports = {
     userAuth,
     adminAuth,
+    cartAuth,
+    removeCartSession
 };

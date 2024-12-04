@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="assets/css/responsive.css">
   <style>
     nav.main-menu ul>li:hover ul {
-      color: white;
+      color: rgb(0, 0, 0);
       background-color: #2e2e2e;
       margin-top: 25px;
       opacity: 1;
@@ -234,7 +234,7 @@
   </style>
 </head>
 
-<body class="bg-secondary">
+<body class="">
 
   <!--PreLoader-->
   <div class="loader">
@@ -253,14 +253,14 @@
             <!-- logo -->
             <div class="site-logo">
               <a href="/">
-                <img style="width: 50px; height: 50px;" src="/mystyle/img/logo.png" alt="">
+                <img style="width: 50px; height: 50px; margin-left: 10px; margin-top: 6px;" src="/mystyle/img/logo.png" alt="">
               </a>
             </div>
             <!-- logo -->
 
             <!-- menu start -->
             <nav class="main-menu">
-              <ul>
+              <ul style="height: 80px; background-color: #051922;" class=" rounded-3 ">
                 <li class="current-list-item"><a href="/">Home</a>
                   
                 </li>
@@ -274,15 +274,17 @@
                 <li>
                   <div class="header-icons">
 
-                    <a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-                    <script>console.log(userData)</script>
+                    <a class="mobile-hide search-bar-icon" href="/wishlist"><i class="bi  bi-suit-heart"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                    </svg></i></a>
+                    
                   </div>
                 </li>
                 <li>
                   <div class="header-icons">
-                    <a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+                    <a class="shopping-cart" href="/cart"><i class="fas fa-shopping-cart"></i></a>
 
-                    <script>console.log(userData)</script>
+                    
                   </div>
                 </li>
                 <li>

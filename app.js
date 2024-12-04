@@ -13,6 +13,10 @@ const exp = require('constants')
 
 const userRouter=require('./routes/userRouter.js')
 const adminRouter=require('./routes/adminRouter.js')
+app.use((req, res, next) => {
+    res.setHeader('ngrok-skip-browser-warning', 'true');
+    next();
+});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

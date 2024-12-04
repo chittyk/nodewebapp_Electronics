@@ -1,4 +1,6 @@
 const mongoose=require('mongoose')
+const { defaultMaxListeners } = require('nodemailer/lib/xoauth2')
+const { bool } = require('sharp')
 const {Schema}=mongoose
 
 
@@ -9,6 +11,7 @@ const addressSchema =new Schema({
         required:true
     },
     address:[{
+        
         addressType:{
             type:String,
             required:true
@@ -40,6 +43,11 @@ const addressSchema =new Schema({
         altPhone:{
             type:String,
             required:true
+        },
+        isSelected:{
+            type:Boolean,
+            default:false
+            
         }
     }]
 })

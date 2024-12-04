@@ -1,48 +1,106 @@
 <%- include("../../views/partials/user/header") %>
 
 
-<section class="content-main mt-80 mb-80">
-   <div class="card mx-auto card-login col-4">
-       <div class="card-body">
-           <h4 class="card-title mb-4">Enter New Email</h4>
-           <form method="post" action="/update-email" onsubmit="return validateEmailForm()">
-               <div class="mb-3">
-                   <input class="form-control" name="newEmail" placeholder="New Email" type="text" id="email">
-                   <div class="error-message" id="email-error"></div>
-               </div>
-               <div class="mb-4">
-                   <button type="submit" class="btn btn-primary w-100">Submit</button>
-               </div>
-           </form>
-       </div>
-   </div>
-</section>
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login col-4">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Enter New Data</h4>
+                <form method="post" action="/update-email" onsubmit="return validateEmailForm()">
+                    <% if (locals.aboutUser) { %>
+                        <div class="mb-3">
+                            <label for="newName">Name</label>
+                            <input class="form-control" name="newName" value="<%= aboutUser.name %>" type="text" id="name">
+                            <div class="error-message" id="name-error"></div><br>
+
+                            <label for="newEmail">Email</label>
+                            <input class="form-control" name="newEmail"   value="<%= aboutUser.email %>" type="text" id="email">
+                            <div class="error-message" id="email-error"></div>
+                            <br>
+                            <label for="newPhone">Phone</label>
+                            <input class="form-control" name="newPhone" value="<%= aboutUser.phone %>" type="text" id="phone">
+                            <div class="error-message" id="phone-error"></div>
+                        </div>
+                        <% } %>
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-primary w-100">Submit</button>
+                            </div>
+                </form>
+            </div>
+        </div>
+    </section>
 
 
-<script>
-   function validateEmailForm() {
-       const emailInput = document.getElementById('email');
-       const emailError = document.getElementById('email-error');
-       const emailValue = emailInput.value.trim();
-       const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-
-       if (emailValue === '') {
-           emailError.textContent = 'Please enter your new email.';
-           emailInput.classList.add('is-invalid');
-           return false;
-       } else if (!emailValue.match(emailPattern)) {
-           emailError.textContent = 'Please enter a valid email address';
-           emailInput.classList.add('is-invalid');
-           return false;
-       } else {
-           emailError.textContent = '';
-           emailInput.classList.remove('is-invalid');
-           return true;
-       }
-   }
-</script>
-<%- include("../../views/partials/user/footer") %>
-
-
-
+    <script>
+        function validateEmailForm() {
+            let status1 = false;
+            let status2 = false;
+            let status3 = false;
+    
+            const nameInput = document.getElementById('name');
+            const nameError = document.getElementById('name-error');
+    
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+    
+            const phoneInput = document.getElementById('phone');
+            const phoneError = document.getElementById('phone-error');
+    
+            const nameValue = nameInput.value.trim();
+            const emailValue = emailInput.value.trim();
+            const phoneValue = phoneInput.value.trim();
+    
+            const namePattern = /^[A-Za-z]+(([ -_][A-Za-z ])?[A-Za-z]*)*$/;
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            const phonePattern = /^\d{10}$/;
+    
+            // Validate Name
+            if (nameValue === '') {
+                nameError.textContent = "Name cannot be empty";
+                nameError.style.color = 'red';
+                nameInput.classList.add('is-invalid');
+            } else if (!nameValue.match(namePattern)) {
+                nameError.textContent = 'Invalid name';
+                nameError.style.color = 'red';
+                nameInput.classList.add('is-invalid');
+            } else {
+                nameError.textContent = '';
+                nameInput.classList.remove('is-invalid');
+                status1 = true;
+            }
+    
+            // Validate Email
+            if (emailValue === '') {
+                emailError.textContent = 'Email cannot be empty';
+                emailError.style.color = 'red';
+                emailInput.classList.add('is-invalid');
+            } else if (!emailValue.match(emailPattern)) {
+                emailError.textContent = 'Invalid email address';
+                emailError.style.color = 'red';
+                emailInput.classList.add('is-invalid');
+            } else {
+                emailError.textContent = '';
+                emailInput.classList.remove('is-invalid');
+                status2 = true;
+            }
+    
+            // Validate Phone
+            if (phoneValue === '') {
+                phoneError.textContent = 'Phone number cannot be empty';
+                phoneError.style.color = 'red';
+                phoneInput.classList.add('is-invalid');
+            } else if (!phoneValue.match(phonePattern)) {
+                phoneError.textContent = 'Phone number should be 10 digits';
+                phoneError.style.color = 'red';
+                phoneInput.classList.add('is-invalid');
+            } else {
+                phoneError.textContent = '';
+                phoneInput.classList.remove('is-invalid');
+                status3 = true;
+            }
+    
+            // Return final status
+            return status1 && status2 && status3;
+        }
+    </script>
+    
+    <%- include("../../views/partials/user/footer") %>

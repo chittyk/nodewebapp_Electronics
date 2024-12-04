@@ -12,6 +12,7 @@ const brandController =require('../controllers/admin/brandController');
 const { authenticate } = require('passport');
 const BannerController =require('../controllers/admin/bannerController');
 const Banner = require('../models/BannerSchema');
+const orderController =require("../controllers/admin/orderController");
 //pageNotFound
 router.get("/pageNotFound",adminAuth,adminController.pageNotFound)
 
@@ -25,6 +26,8 @@ router.get('/logout', adminController.logout);
 router.get('/users', adminAuth, customerController.customerInfo);
 router.get('/blockCustomer', adminAuth, customerController.blockCustomer); // Changed to POST
 router.get('/unblockCustomer', adminAuth, customerController.unblockCustomer); // Changed to POST
+
+
 
 // Category management
 router.get('/category', adminAuth, categoryController.categoryInfo); // Corrected route
@@ -63,7 +66,15 @@ router.get('/addBanner',adminAuth,BannerController.addBannerPage)
 router.post('/addBanner',adminAuth,uploads.single('images'),BannerController.addBanner)
 router.get('/deleteBanner',adminAuth,BannerController.deleteBanner)
 
+//order management
+router.get('/orders',adminAuth,orderController.getOrders)
+router.post('/changeStatus',adminAuth,orderController.changeStatus)
+router.post('/removeFromHistory',adminAuth,orderController.removeFromHistory)
 
+// Assuming you have a route for updating the order status
+router.post('/update-order-status',adminAuth,orderController.updateOrders);
+
+router.get('/orderDetails', adminAuth, orderController.orderDetails);
 
 
 module.exports = router;

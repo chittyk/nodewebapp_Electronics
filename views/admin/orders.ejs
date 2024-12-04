@@ -1,0 +1,197 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb5QH1ZqG1BTAk6Ey0jTkC4QiGDU48OxT7T29"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    </head>
+
+    <body>
+        <div class="row">
+
+
+            <center>
+                <h2 class="text-center">Order Management</h2>
+            </center>
+
+
+
+
+            <div style="width: 1313px; height: 62px; margin-left: 280px;" class="mt-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search orders..."
+                    onkeyup="searchOrders()">
+            </div>
+
+        </div>
+
+        <div style="margin-left: 260px; width:1313px ;" class=" mt-4">
+
+
+
+            <table class="table table-bordered table-striped mt-4" id="ordersTable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Name</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Date Ordered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (result.length> 0) {
+                        // Sort orders by creation date (newest first)
+                        result.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+
+                        result.forEach(order => { %>
+                        <tr>
+                            <td><a href="/admin/orderDetails?id=<%= order.orderId %>">
+                                    <%= order.orderId %>
+                                </a></td>
+                            <td>
+                                <%= order.userName %>
+                            </td>
+                            <td>₹<%= order.totalPrice %>
+                            </td>
+                            <td id="status-<%= order.orderId %>">
+                                <%= order.status %>
+                            </td>
+                            <td>
+                                <%= new Date(order.createdOn).toLocaleDateString('en-US') %>
+                                    <%= new Date(order.createdOn).toLocaleTimeString('en-US') %>
+                            </td>
+                            <td>
+                                <select class="form-control form-control-sm"
+                                    onchange="changeStatus(this.value, '<%= order.orderId %>')">
+                                    <option value="">Update Status</option>
+                                    <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
+                                    </option>
+                                    <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
+                                        >Processing</option>
+                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
+                                    </option>
+                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                        >Delivered</option>
+                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                        >Cancelled</option>
+                                    <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <% }); } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No orders found</td>
+                            </tr>
+                            <% } %>
+                </tbody>
+
+            </table>
+            <div class="row justify-content-center">
+
+
+            </div>
+
+            <script>
+                // Function to filter table rows based on search input
+                function searchOrders() {
+                    const input = document.getElementById('searchInput').value.toLowerCase();
+                    const rows = document.querySelectorAll('#ordersTable tbody tr');
+
+                    rows.forEach(row => {
+                        const orderId = row.cells[0].textContent.toLowerCase();
+                        const customerName = row.cells[1].textContent.toLowerCase();
+                        const totalPrice = row.cells[2].textContent.toLowerCase();
+                        const status = row.cells[3].textContent.toLowerCase();
+                        const dateOrdered = row.cells[4].textContent.toLowerCase();
+
+                        if (
+                            orderId.includes(input) ||
+                            customerName.includes(input) ||
+                            totalPrice.includes(input) ||
+                            status.includes(input) ||
+                            dateOrdered.includes(input)
+                        ) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Function to handle status changes
+                function changeStatus(newStatus, orderId) {
+                    Swal.fire({
+                        title: `Change status to "${newStatus}"?`,
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, change it!",
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            console.log(`Status for Order ID ${orderId} updated to ${newStatus}`);
+                            // Add AJAX or API call here to update the status on the server
+                        }
+                    });
+                }
+            </script>
+            <script>
+                function changeStatus(newStatus, orderId) {
+                    if (!newStatus) return;
+
+                    Swal.fire({
+                        title: `Change status to "${newStatus}"?`,
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, change it!",
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            // Send the status update request to the backend
+                            $.ajax({
+                                url: `/admin/update-order-status`,
+                                method: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify({ orderId, status: newStatus }),
+                                success: (response) => {
+                                    Swal.fire("Updated!", response.message, "success");
+                                    // Update the status cell in the table
+                                    document.getElementById(`status-${orderId}`).textContent = newStatus;
+                                },
+                                error: error => {
+                                    Swal.fire("Error!", error.responseJSON.message || "Failed to update status", "error");
+                                },
+                            });
+                        }
+                    });
+                }
+
+            </script>
+            <script>
+                function orderDetails(id) {
+                    console.log('Fetching order details for:', id);
+
+                    $.ajax({
+                        url: '/admin/orderDetails',
+                        method: 'GET',
+                        data: { id: id }, // Query parameters appended to the URL
+                        success: (response) => {
+                            console.log('Order details fetched successfully:', response);
+                            // Handle the response, e.g., display order details in a modal
+                            Swal.fire({
+                                title: 'Order Details',
+                                         // Example display
+                                icon: 'info'
+                            });
+                        },
+                        error: (error) => {
+                            console.error('Error fetching order details:', error);
+                            Swal.fire('Error', 'Failed to fetch order details', 'error');
+                        }
+                    });
+                }
+
+            </script>
+
+            <%- include("../../views/partials/admin/footer") %>
