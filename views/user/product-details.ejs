@@ -48,7 +48,7 @@
                                                         src="/uploads/product-images/<%= product.productImage[i] %>"
                                                         alt="">
                                                 </div>
-                                                <% } %>
+                                            <% } %>
 
                                         </div>
                                     </div>
@@ -79,7 +79,7 @@
                                                         <%= product.regularPrice %>
                                                     </span></ins>
                                                 <span class="save-price text-success  font-md color3 ml-15">
-                                                    <%= product.regularPrice-product.salePrice %>off
+                                                    <%= product.regularPrice-product.salePrice %> off
                                                 </span>
                                             </div>
                                         </div>
@@ -102,18 +102,10 @@
 
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                         <div class="detail-extralink">
-                                            <div class="detail-qty border radius">
-                                                <a href="#" class="qty-down" onclick=""><i
-                                                        class="fi-rs-angle-small-down"></i></a>
-                                                <span class="qty-val" id="quantity">1</span>
-                                                <a href="#" class="qty-up" onclick=""><i
-                                                        class="fi-rs-angle-small-up"></i></a>
-                                            </div>
+                                            
                                             <div class="product-extra-link2">
-
                                                 <button type="submit" class="button button-add-to-cart"
-                                                    onclick=" ValidateCart()">Add to cart</button>
-
+                                                    onclick="addToCart()">Add to cart</button>
                                                 <a aria-label="Add To Wishlist" onclick="addToWishlist( '<%= product._id %>' )" class="action-btn hover-up" href="#"><i
                                                         class="fi-rs-heart"></i></a>
                                             </div>
@@ -134,7 +126,7 @@
                                                 <%= category.name %>
                                             </a> <a href="#" rel="tag"></a> <a href="#" rel="tag"></a> </li>
                                         <li>Availability:<span class="in-stock text-success ml-5">
-                                                <%= product.quantity %>Nos
+                                                <%= product.quantity %> Nos
                                             </span></li>
                                     </ul>
                                 </div>
@@ -149,107 +141,44 @@
     </main>
 
     <script>
-        const stock = (<%= product.quantity %>)
+        function addToCart() {
+            const productId = "<%= product._id %>"; // Use your product's ID
 
-        const quantityVal = () => {
-            const countVal = parseInt(document.getElementById('quantity').textContent); // Parse to number
-            const countError = document.getElementById('error-msg');
-
-            if (isNaN(countVal) || countVal > stock || countVal <= 0) {
-                countError.textContent = 'Out of Stock or Invalid Quantity';
-                countError.classList.add('in-valid');
-                return false;
-            } else {
-                countError.textContent = '';
-                countError.classList.remove('in-valid');
-                return true;
-            }
-        };
-
-
-        function ValidateCart() {
-            console.log('Hello from ValidateCart function');
-            const isQuantityValid = quantityVal(); // Validate quantity
-            if (isQuantityValid) {
-                const productId = "<%= product._id %>"; // Use your product's ID
-                const quantity = parseInt(document.getElementById('quantity').textContent); // Ensure quantity is a number
-
-                // AJAX call to add the product to the cart
-                $.ajax({
-                    url: '/cart', // Backend route to handle adding to the cart
-                    method: 'POST',
-                    contentType: 'application/json', // Set content type to JSON
-                    data: JSON.stringify({ productId, quantity }), // Send productId and quantity
-                    success: (response) => {
-                        if (response.status === 'success') {
-                            Swal.fire({
-                                title: 'Added to Cart',
-                                text: 'The product has been added to your cart successfully.',
-                                icon: 'success',
-                                timer: 2000,
-                            });
-                        }
-                        else {
-                            Swal.fire({
-                                title: 'error',
-                                text: response.message || 'Could not add to cart.',
-                                icon: 'error',
-                                timer: 2000,
-                            });
-                        }
-                    },
-                    error: (xhr, status, error) => {
+            // AJAX call to add the product to the cart
+            $.ajax({
+                url: '/cart', // Backend route to handle adding to the cart
+                method: 'POST',
+                contentType: 'application/json', // Set content type to JSON
+                data: JSON.stringify({ productId }), // Send only productId
+                success: (response) => {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            title: 'Added to Cart',
+                            text: 'The product has been added to your cart successfully.',
+                            icon: 'success',
+                            timer: 2000,
+                        });
+                    }
+                    else {
                         Swal.fire({
                             title: 'Error',
-                            text: xhr.responseJSON?.message || 'An error occurred.',
+                            text: response.message || 'Could not add to cart.',
                             icon: 'error',
                             timer: 2000,
                         });
-                    },
-
-                });
-            }
+                    }
+                },
+                error: (xhr, status, error) => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: xhr.responseJSON?.message || 'An error occurred.',
+                        icon: 'error',
+                        timer: 2000,
+                    });
+                },
+            });
         }
 
-
-        function addToWishlist(productId) {
-      $.ajax({
-        url: '/addToWishlist',
-        method: 'POST',
-        data: {
-          productId: productId
-        },
-        success: (response) => { // Include 'response' to access server response
-          if (response.status) {
-            Swal.fire({
-              title: 'Added to Wishlist',
-              text: 'The product was successfully added to your wishlist.',
-              icon: 'success',
-              timer: 2000
-            });
-          } else {
-            Swal.fire({
-              icon: 'info',
-              title: 'Already in Wishlist',
-              text: response.message, // Use message from server response
-              timer: 2000
-            });
-          }
-        },
-        error: (xhr, status, error) => { // Include arguments for detailed error handling
-          Swal.fire({
-            title: 'Error',
-            text: xhr.responseJSON?.message || 'An error occurred while adding to the wishlist.',
-            icon: 'error',
-            timer: 2000
-          });
-        }
-      });
-    }
-    </script>
-    <script>
-
-        const heart = document.getElementById('heart')
         function addToWishlist(productId) {
             $.ajax({
                 url: '/addToWishlist',
@@ -265,7 +194,6 @@
                             icon: 'success',
                             timer: 2000
                         });
-                        heart.style.color = "red"
                     } else {
                         Swal.fire({
                             icon: 'info',
@@ -273,7 +201,6 @@
                             text: response.message, // Use message from server response
                             timer: 2000
                         });
-                        heart.style.color = "red"
                     }
                 },
                 error: (xhr, status, error) => { // Include arguments for detailed error handling

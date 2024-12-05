@@ -605,6 +605,8 @@ const logout = async (req, res) => {
 
 const loadShop = async (req,res) => {
   try {
+    const sortBy = req.query.sortBy || 'default'; // Use 'default' if sortBy is undefined
+  
     const user =req.session.user
     const userData =await User.findOne({_id:user})
     const categories =await Category.find({isListed:true})
@@ -635,7 +637,8 @@ const loadShop = async (req,res) => {
       brand :brands,
       totalProducts:totalProduct,
       currentPage :page,
-      totalPages:totalPages
+      totalPages:totalPages,
+      sortBy:sortBy
     })
   } catch (error) {
     res.redirect('/pageNotFound')

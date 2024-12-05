@@ -57,17 +57,17 @@ const postCart = async (req, res) => {
         console.log('Request received for adding to cart');
         console.log(req.body);
 
-        const { productId, quantity } = req.body;
+        const { productId } = req.body;
         const userId = req.session.user;
-
+        const quantity=1
         // Fetch product details
         const product = await Product.findOne({ _id: productId });
         if (!product) {
             return res.status(404).json({ status: 'error', message: 'Product not found' });
         }
-
+        
         // Calculate total price for this item
-        const itemTotalPrice = quantity * product.salePrice;
+        const itemTotalPrice = 1 * product.salePrice;
 
         // Find user's cart
         let cart = await Cart.findOne({ userId });

@@ -66,6 +66,18 @@
         .text-info {
             color: #17a2b8;
         }
+        .quantity-group {
+    display: flex;
+    align-items: center;
+    max-width: 120px;
+}
+
+.btn-decrease,
+.btn-increase {
+    font-size: 1rem;
+    padding: 5px 10px;
+}
+
     </style>
 
     <br><br><br><br><br>
@@ -87,7 +99,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="text-success">Cart Items</h4>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="select-all">
+                            <input type="checkbox" class="form-check-input" checked="true" id="select-all">
                             <label class="form-check-label" for="select-all">Select All</label>
                         </div>
                     </div>
@@ -101,7 +113,7 @@
                                 <div class="cart-item d-flex align-items-center mb-3 border rounded p-2 bg-light">
                                     <!-- Checkbox -->
                                     <div class="form-check me-3 align-self-start">
-                                        <input type="checkbox" value="<%= product[i]._id %>" class="form-check-input item-select"
+                                        <input type="checkbox" value="<%= product[i]._id %>" checked="true" class="form-check-input item-select"
                                             data-index="<%= i %>">
                                     </div>
 
@@ -121,12 +133,13 @@
                                         </p>
                                         <div class="d-flex align-items-center">
                                             <label for="quantity-<%= i %>" class="me-2 mb-0">Qty:</label>
-                                            <input id="quantity-<%= i %>" type="number"
-                                                class="quantity-control form-control w-auto"
-                                                value="<%= cart.items[i].quantity %>" min="1" max="5"
-                                                data-index="<%= i %>">
-
+                                            <div class="input-group quantity-group">
+                                                <button class="btn btn-outline-secondary btn-decrease" type="button" data-index="<%= i %>">-</button>
+                                                <input id="quantity-<%= i %>" type="number" class="quantity-control form-control text-center" value="<%= cart.items[i].quantity %>" min="1" max="<%= product[i].quantity %>" data-index="<%= i %>">
+                                                <button class="btn btn-outline-secondary btn-increase" type="button" data-index="<%= i %>">+</button>
+                                            </div>
                                         </div>
+                                        
                                     </div>
 
                                     <!-- Total and Remove Button -->
@@ -209,7 +222,7 @@
 
                 // Check if quantity is less than 1
                 if (quantity < 1) {
-                    alert("Quantity must be at least 1.");
+                    
                     this.value = 1;
                 }
 
@@ -361,5 +374,47 @@
 
         renderCart();
     </script>
+    <script>
+        document.querySelectorAll('.btn-increase').forEach(button => {
+    button.addEventListener('click', function () {
+        const index = this.dataset.index;
+        const input = document.getElementById(`quantity-${index}`);
+        const cartItem = input.closest('.cart-item');
+        let quantity = parseInt(input.value, 10);
 
+        // Ensure quantity doesn't exceed stock
+        if (quantity < stock[index] && quantity <=5) {
+            quantity++;
+            input.value = quantity;  // Update input field
+
+            // Update the item total price
+            const itemPrice = parseFloat(cartItem.querySelector('.total-item-price').dataset.price);
+            updateItemTotal(cartItem, itemPrice);  // Update the total for the item
+            renderCart();  // Re-render the cart to update totals and item count
+        } else {
+            
+        }
+    });
+});
+
+
+document.querySelectorAll('.btn-decrease').forEach(button => {
+    button.addEventListener('click', function () {
+        const index = this.dataset.index;
+        const input = document.getElementById(`quantity-${index}`);
+        const cartItem = this.closest('.cart-item');
+        const itemPrice = parseFloat(cartItem.querySelector('.total-item-price').dataset.price);
+
+        let value = parseInt(input.value, 10);
+        value = Math.max(value - 1, 1); // Adjust min limit
+        input.value = value;
+
+        updateItemTotal(cartItem, itemPrice);
+        renderCart();
+    });
+});
+    
+    </script>
+
+    
     <%- include("../../views/partials/user/footer") %>
