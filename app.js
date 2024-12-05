@@ -39,6 +39,16 @@ app.use((req,res,next)=>{
     next()
 })
 
+app.use('/login', (req, res, next) => {
+    if (req.session && req.session.user) {
+        // If the user is already logged in, redirect to the dashboard or home page
+        res.redirect('/'); // Adjust the route as needed
+    } else {
+        // If not logged in, allow access to the login page
+        next();
+    }
+});
+
 
 //seting viewengineb
 
