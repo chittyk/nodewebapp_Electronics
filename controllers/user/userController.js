@@ -604,6 +604,7 @@ const logout = async (req, res) => {
 }
 const loadShop = async (req, res) => {
   try {
+    const query = ""
     const user = req.session.user;
     const userData = await User.findOne({ _id: user });
     const categories = await Category.find({ isListed: true });
@@ -640,6 +641,8 @@ const loadShop = async (req, res) => {
       totalProducts,
       currentPage: page,
       totalPages,
+      query 
+      
     });
   } catch (error) {
     res.redirect('/pageNotFound');
@@ -647,6 +650,7 @@ const loadShop = async (req, res) => {
 };
 const filterProduct = async (req, res) => {
   try {
+    
     const user = req.session.user;
     const category = req.query.category;
     const brand = req.query.brand;
@@ -702,7 +706,8 @@ const filterProduct = async (req, res) => {
       totalPages,
       currentPage,
       selectedCategory: category || null,
-      selectedBrand: brand || null
+      selectedBrand: brand || null,
+      query
     });
     
 
@@ -714,6 +719,7 @@ const filterProduct = async (req, res) => {
 
 const filterPrice = async (req,res) => {
   try {
+    const query = ""
     const user =req.session.user
     const userData = await User.findOne({_id:user})
     const brands = await Brand.find({}).lean()
@@ -741,6 +747,7 @@ const filterPrice = async (req,res) => {
       brand:brands,
       totalPages,
       currentPage,
+      query
     })
   } catch (error) {
     res.redirect('/pageNotFound')
@@ -875,6 +882,76 @@ const sortProduct = async (req, res) => {
   }
 };
 
+const advancedSearch = async (req, res) => {
+  try {
+    const { sort, query } = req.query; // Destructure query params
+    const categories = await Category.find({ isListed: true }); // Get listed categories
+
+    // Start with an empty filter for products
+    let filter = {};
+    if (query) {
+      // Add search filter for productName
+      filter.productName = { $regex: query, $options: 'i' }; // Case-insensitive match
+    }
+
+    // Include the `isFeatured` filter inside sorting logic, not outside
+    if (sort === 'featured') {
+      filter.isFeatured = true; // Only featured products
+    }
+
+    // Start building the query
+    let productsQuery = Product.find(filter);
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<',sort,query)
+    // Sorting Logic
+    switch (sort) {
+      case 'popularity':
+        productsQuery = productsQuery.sort({ salePrice: -1 }); // Most popular first
+        break;
+      case 'priceLowHigh':
+        productsQuery = productsQuery.sort({ salePrice: 1 }); // Lowest price first
+        break;
+      case 'priceHighLow':
+        productsQuery = productsQuery.sort({ salePrice  : -1 }); // Highest price first
+        break;
+      case 'ratings':
+        productsQuery = productsQuery.sort({ averageRating: -1 }); // Highest rating first
+        break;
+      case 'newArrivals':
+        productsQuery = productsQuery.sort({ createdAt: -1 }); // Newest first
+        break;
+      case 'aToZ':
+        productsQuery = productsQuery.sort({ productName: 1 }); // Alphabetical order
+        break;
+      case 'zToA':
+        productsQuery = productsQuery.sort({ productName: -1 }); // Reverse alphabetical order
+        break;
+      default:
+        productsQuery = productsQuery.sort({ createdAt: -1 }); // Default: New arrivals
+    }
+
+    // Log the final query (for debugging purposes)
+    console.log('Final Product Query:', productsQuery);
+
+    // Fetch the filtered and sorted products
+    const products = await productsQuery;
+
+    // Fetch brands
+    const brands = await Brand.find({ isBlocked: false });
+
+    // Render the page with the fetched data
+    res.render('shop', {
+      products,
+      category: categories,
+      brand: brands,
+      currentPage: 1, // Assuming first page for now
+      totalPages: 1,  // Assuming only 1 page of products for now
+      query,
+    });
+  } catch (error) {
+    console.error('Error in advancedSearch:', error);
+    res.status(500).send('Server Error');
+  }
+};
 
 
 module.exports = {
@@ -892,5 +969,6 @@ module.exports = {
   filterPrice,
   searchProduct,
   detailProduct,
-  sortProduct
+  sortProduct,
+  advancedSearch
 };

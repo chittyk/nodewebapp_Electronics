@@ -220,14 +220,31 @@
 <br><br><br><br><br><br><br>
 <div class="main-container">
  <section class="shop-page container">
-   <div class="shop-topbar">
-     <div class="search-bar">
-       <form action="/search" method="POST" class="search-form">
-         <input type="text" name="query" placeholder="Search items..." class="search-input" />
-         <button type="submit" class="search-button">Search</button>
-       </form>
-     </div>
-   </div>
+  <div class="shop-topbar">
+    <div class="search-bar">
+      <form action="/advancedSearch" method="GET" class="search-form">
+        <input type="text" name="query" placeholder="Search items..." class="search-input" />
+        <button type="submit" class="search-button">Search</button>
+      </form>
+    </div>
+   
+    <div class="sort-dropdown">
+      <form action="/advancedSearch" method="GET">
+        <select name="sort" class="form-select" onchange="this.form.submit()">
+          <option value="" disabled selected>Sort By</option>
+          <option value="popularity">Popularity</option>
+          <option value="priceLowHigh">Price: Low to High</option>
+          <option value="priceHighLow">Price: High to Low</option>
+          <option value="averageRatings">Average Ratings</option>
+          <option value="featured">Featured</option>
+          <option value="newArrivals">New Arrivals</option>
+          <option value="aToZ">A - Z</option>
+          <option value="zToA">Z - A</option>
+        </select>
+        <input type="hidden" name="query" value="<%= query || '' %>">
+      </form>
+    </div>
+  </div>
   
    <div class="product-list-container">
      <aside class="sidebar">
@@ -280,7 +297,7 @@
      <main class="product-grid">
         <% for( let i = 0; i < products.length; i++ ) { %>
             <div class= " bg-white product-card">
-                <span class="wishlist-btn" onclick="">❤️</span>
+                <span class="wishlist-btn" onclick="addToWishlist( '<%= products[i]._id %>' )">❤️</span>
                 <a href="/detailProduct?id=<%= products[i]._id %>">
                   <img src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="" />
                   <h4><%= products[i].productName %></h4>
@@ -293,7 +310,7 @@
                     </span>
                 </div>
                 </a>
-                <button class="add-to-cart-btn" onclick="">Add to Cart</button>
+                <button class="add-to-cart-btn" onclick="addToCart('<%= products[i]._id %>')">Add to Cart</button>
               </div>
         <% } %>
          
@@ -321,4 +338,78 @@
  </section>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script>
+  function addToCart(productId) {
+      
+
+      // AJAX call to add the product to the cart
+      $.ajax({
+          url: '/cart', // Backend route to handle adding to the cart
+          method: 'POST',
+          contentType: 'application/json', // Set content type to JSON
+          data: JSON.stringify({ productId }), // Send only productId
+          success: (response) => {
+              if (response.status === 'success') {
+                  Swal.fire({
+                      title: 'Added to Cart',
+                      text: 'The product has been added to your cart successfully.',
+                      icon: 'success',
+                      timer: 2000,
+                  });
+              }
+              else {
+                  Swal.fire({
+                      title: 'Error',
+                      text: response.message || 'Could not add to cart.',
+                      icon: 'error',
+                      timer: 2000,
+                  });
+              }
+          },
+          error: (xhr, status, error) => {
+              Swal.fire({
+                  title: 'Error',
+                  text: xhr.responseJSON?.message || 'An error occurred.',
+                  icon: 'error',
+                  timer: 2000,
+              });
+          },
+      });
+  }
+
+  function addToWishlist(productId) {
+      $.ajax({
+          url: '/addToWishlist',
+          method: 'POST',
+          data: {
+              productId: productId
+          },
+          success: (response) => { // Include 'response' to access server response
+              if (response.status) {
+                  Swal.fire({
+                      title: 'Added to Wishlist',
+                      text: 'The product was successfully added to your wishlist.',
+                      icon: 'success',
+                      timer: 2000
+                  });
+              } else {
+                  Swal.fire({
+                      icon: 'info',
+                      title: 'Already in Wishlist',
+                      text: response.message, // Use message from server response
+                      timer: 2000
+                  });
+              }
+          },
+          error: (xhr, status, error) => { // Include arguments for detailed error handling
+              Swal.fire({
+                  title: 'Error',
+                  text: xhr.responseJSON?.message || 'An error occurred while adding to the wishlist.',
+                  icon: 'error',
+                  timer: 2000
+              });
+          }
+      });
+  }
+</script>
 <%- include("../../views/partials/user/footer") %>

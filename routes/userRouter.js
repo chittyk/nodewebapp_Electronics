@@ -28,7 +28,7 @@ const express = require('express');
 const router = express.Router();
 const { userAuth, adminAuth, cartAuth, removeCartSession } = require('../middlewares/auth');
 
-const userController = require('../controllers/user/userController');
+const userController =require('../controllers/user/userController');
 const passport = require('passport');
 const profileController =require('../controllers/user/profileController')
 const cartController =require('../controllers/user/cartController')
@@ -94,9 +94,11 @@ router.post('/reset-password',profileController.postNewPassword)
 router.get('/shop',userAuth,userController.loadShop)
 router.get('/filter',userAuth,userController.filterProduct)
 router.get('/filterPrice',userAuth,userController.filterPrice)
-router.post('/search',userAuth,userController.searchProduct)
+// router.post('/search',userAuth,userController.searchProduct)
 router.get('/sort', userAuth, userController.sortProduct);
 router.get('/detailProduct',userAuth,userController.detailProduct)
+router.get('/advancedSearch', userAuth, userController.advancedSearch);
+
 
 //wishlist management
 router.get('/wishlist',userAuth,wishlistController.getWishlist)
