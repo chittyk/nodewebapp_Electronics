@@ -120,7 +120,8 @@ router.post('/confirmOrder',removeCartSession,userAuth,cartController.postConfir
 router.post('/cancelOrder',userAuth,cartController.cancelOrder)
 router.post('/returnOrder',userAuth,cartController.returnOrder)
 router.post('/cancellReturnOrder',userAuth,cartController.cancellReturnOrder)
-
+router.get('/orderDetails',userAuth,cartController.orderDetails)
+router.get('/orderDetails1',userAuth,cartController.orderDetails1)
 module.exports = router;
 
 

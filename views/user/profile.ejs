@@ -163,404 +163,70 @@
                     <table class="table">
                       <% if (orders.length>0) { %>
 
-                        <% for( let i=0; i < orders.length; i++ ) { %>
-                          <% if (orders[i].status==='pending' ) { %>
-                            <!-- Order Card 1 -->
-                            <div class="card order-card">
-                              <div class="card-header order-header position-relative">
-                                <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                                <span class="order-status badge bg-warning position-absolute top-0 end-0 m-2">
-                                  <%= orders[i].status %>
-                                </span>
-                                <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                              </div>
-                              <div class="card-body">
-                                <div class="row">
-                                  <div class="col-md-7">
-                                    <h5>Product List</h5>
-                                    <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                                      <% let ProductName="hari" %>
-                                        <% product.forEach(product=> { %>
-                                          <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                            <div class="d-flex justify-content-between">
-                                              <span>
-                                                <%= ProductName %>
-                                              </span>
-                                              <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                              <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                            </div>
-                                  </div>
-                                  <% } %>
+                        <% const statusClasses = { 
+    pending: 'bg-warning', 
+    Processing: 'bg-info', 
+    Shipped: 'bg-secondary', 
+    Delivered: 'bg-success', 
+    Cancelled: 'bg-danger' 
+}; %>
 
-                                </div>
-                                <div class="col-md-5">
-                                  <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                                  </h5>
-                                  <div class="order-actions">
-                                    <button class="btn btn-primary">Track Order</button>
-                                    <button class="btn btn-secondary"
-                                      onclick="cancelOrder('<%= orders[i]._id %>')">Cancel Order</button>
+<% orders.forEach(order => { %>
+  <!-- Order Card -->
+  <div class="card order-card">
+    <div class="card-header order-header position-relative">
+      <span class="order-id">OrderId #<a href="/orderDetails?id=<%= order.orderId %>">
+        <%= order.orderId %>
+    </a></span>
+      
+      <span class="order-status badge <%= statusClasses[order.status.toLowerCase()] %> position-absolute top-0 end-0 m-2">
+        <%= order.status %>
+      </span>
+      <span class="delivery-date">| Delivery Date: January 25, 2024</span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-7">
+          <h5>Product List</h5>
+          <% 
+  order.orderedItems.forEach(item => { 
+    const productMatch = product.find(p => p.id.toString() === item.product.toString()); 
+    const ProductName = productMatch ? productMatch.productName : "Product details not available"; 
+%>
+    <div class="order-details">
+      <div class="d-flex justify-content-between">
+        <span><%= ProductName %></span>
+        <span>Quantity: <%= item.quantity %></span>
+        <span>Price: ₹<%= item.price %></span>
+      </div>
+    </div>
+<% 
+  }); 
+%>
 
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                  </div><br>
-                  <% } %>
-                    <% } %>
-                      <% for( let i=0; i < orders.length; i++ ) { %>
-                        <% if (orders[i].status==='Processing' ) { %>
-                          <!-- Order Card 1 -->
-                          <div class="card order-card">
-                            <div class="card-header order-header position-relative">
-                              <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                              <span class="order-status badge bg-info position-absolute top-0 end-0 m-2">
-                                <%= orders[i].status %>
-                              </span>
-                              <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                            </div>
-                            <div class="card-body">
-                              <div class="row">
-                                <div class="col-md-7">
-                                  <h5>Product List</h5>
-                                  <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                                    <% let ProductName="hari" %>
-                                      <% product.forEach(product=> { %>
-                                        <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                          <div class="d-flex justify-content-between">
-                                            <span>
-                                              <%= ProductName %>
-                                            </span>
-                                            <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                            <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                          </div>
-                                </div>
-                                <% } %>
-
-                              </div>
-                              <div class="col-md-5">
-                                <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                                </h5>
-                                <div class="order-actions">
-                                  <button class="btn btn-primary">Track Order</button>
-                                  <button class="btn btn-secondary">Reorder</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                </div><br>
-                <% } %>
-                  <% } %>
-                    <% for( let i=0; i < orders.length; i++ ) { %>
-                      <% if (orders[i].status==='Processing' ) { %>
-                        <!-- Order Card 1 -->
-                        <div class="card order-card">
-                          <div class="card-header order-header position-relative">
-                            <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                            <span class="order-status badge bg-primary position-absolute top-0 end-0 m-2">
-                              <%= orders[i].status %>
-                            </span>
-                            <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                          </div>
-                          <div class="card-body">
-                            <div class="row">
-                              <div class="col-md-7">
-                                <h5>Product List</h5>
-                                <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                                  <% let ProductName="hari" %>
-                                    <% product.forEach(product=> { %>
-                                      <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                        <div class="d-flex justify-content-between">
-                                          <span>
-                                            <%= ProductName %>
-                                          </span>
-                                          <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                          <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                        </div>
-                              </div>
-                              <% } %>
-
-                            </div>
-                            <div class="col-md-5">
-                              <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                              </h5>
-                              <div class="order-actions">
-                                <button class="btn btn-primary">Track Order</button>
-                                <button class="btn btn-secondary" onclick="cancelOrder('<%= orders[i]._id %>')">Cancel
-                                  Order</button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-              </div><br>
+        </div>
+        <div class="col-md-5">
+          <h5 class="order-price">Total: ₹<%= order.totalPrice %></h5>
+          <div class="order-actions">
+            <% if (order.status === 'Delivered') { %>
+              <button class="btn btn-warning bg-danger" onclick="returnOrder('<%= order._id %>')">Return Order</button>
+            <% } else if (order.status === 'Cancelled') { %>
+              <button class="btn btn-secondary" disabled>Cancelled</button>
+            <% } else { %>
+              <button class="btn btn-primary">Track Order</button>
+              <% if (order.status === 'pending') { %>
+                <button class="btn btn-secondary" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+              <% } else if (order.status === 'Processing') { %>
+                <button class="btn btn-secondary">Reorder</button>
               <% } %>
-                <% } %>
-                  <% for( let i=0; i < orders.length; i++ ) { %>
-                    <% if (orders[i].status==='Shipped' ) { %>
-                      <!-- Order Card 1 -->
-                      <div class="card order-card">
-                        <div class="card-header order-header position-relative">
-                          <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                          <span class="order-status badge bg-secondary position-absolute top-0 end-0 m-2">
-                            <%= orders[i].status %>
-                          </span>
-                          <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                        </div>
-                        <div class="card-body">
-                          <div class="row">
-                            <div class="col-md-7">
-                              <h5>Product List</h5>
-                              <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                                <% let ProductName="hari" %>
-                                  <% product.forEach(product=> { %>
-                                    <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                      <div class="d-flex justify-content-between">
-                                        <span>
-                                          <%= ProductName %>
-                                        </span>
-                                        <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                        <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                      </div>
-                            </div>
-                            <% } %>
-
-                          </div>
-                          <div class="col-md-5">
-                            <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                            </h5>
-                            <div class="order-actions">
-                              <button class="btn btn-primary">Track Order</button>
-                              <button class="btn btn-secondary" onclick="cancelOrder('<%= orders[i]._id %>')">Cancel
-                                Order</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-            </div><br>
             <% } %>
-              <% } %>
-                <% for( let i=0; i < orders.length; i++ ) { %>
-                  <% if (orders[i].status==='Delivered' ) { %>
-                    <!-- Order Card 1 -->
-                    <div class="card order-card">
-                      <div class="card-header order-header position-relative">
-                        <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                        <span class="order-status badge bg-success position-absolute top-0 end-0 m-2">
-                          <%= orders[i].status %>
-                        </span>
-                        <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                      </div>
-                      <div class="card-body">
-                        <div class="row">
-                          <div class="col-md-7">
-                            <h5>Product List</h5>
-                            <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                              <% let ProductName="hari" %>
-                                <% product.forEach(product=> { %>
-                                  <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                    <div class="d-flex justify-content-between">
-                                      <span>
-                                        <%= ProductName %>
-                                      </span>
-                                      <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                      <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                    </div>
-                          </div>
-                          <% } %>
-
-                        </div>
-                        <div class="col-md-3">
-                          <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                          </h5>
-                          <div class="order-actions">
-                            
-                            <button class="btn btn-warning bg-danger" onclick="returnOrder('<%= orders[i]._id %>')">Return
-                              Order</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-          </div><br>
-          <% } %>
-            <% } %>
-              <% for( let i=0; i < orders.length; i++ ) { %>
-                <% if (orders[i].status==='Cancelled' ) { %>
-                  <!-- Order Card 1 -->
-                  <div class="card order-card">
-                    <div class="card-header order-header position-relative">
-                      <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                      <span class="order-status badge bg-danger position-absolute top-0 end-0 m-2">
-                        <%= orders[i].status %>
-                      </span>
-                      <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-7">
-                          <h5>Product List</h5>
-                          <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                            <% let ProductName="hari" %>
-                              <% product.forEach(product=> { %>
-                                <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                  <div class="d-flex justify-content-between">
-                                    <span>
-                                      <%= ProductName %>
-                                    </span>
-                                    <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                    <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                  </div>
-                        </div>
-                        <% } %>
-
-                      </div>
-                      <div class="col-md-3">
-                        <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                        </h5>
-                        <div class="order-actions">
-                          
-                            
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-        </div><br>
-        <% } %>
-          <% } %>
-            <% for( let i=0; i < orders.length; i++ ) { %>
-              <% if (orders[i].status==='Return Request' ) { %>
-                <!-- Order Card 1 -->
-                <div class="card order-card">
-                  <div class="card-header order-header position-relative">
-                    <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                    <span class="order-status badge bg-warning position-absolute top-0 end-0 m-2">
-                      <%= orders[i].status %>
-                    </span>
-                    <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                  </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-md-8">
-                        <h5>Product List</h5>
-                        <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                          <% let ProductName="hari" %>
-                            <% product.forEach(product=> { %>
-                              <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                                <div class="d-flex justify-content-between">
-                                  <span>
-                                    <%= ProductName %>
-                                  </span>
-                                  <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                  <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                                </div>
-                      </div>
-                      <% } %>
-
-                    </div>
-                    <div class="col-md-4">
-                      <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                      </h5>
-                      <div class="order-actions">
-                        
-                        <button class="btn btn-success bg-success" onclick="cancellReturnOrder('<%= orders[i]._id %>')">Cancel
-                          Return</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-      </div><br>
-      <% } %>
-        <% } %>
-          <% for( let i=0; i < orders.length; i++ ) { %>
-            <% if (orders[i].status==='Returned' ) { %>
-              <!-- Order Card 1 -->
-              <div class="card order-card">
-                <div class="card-header order-header position-relative">
-                  <span class="order-id">OrderId #<%= orders[i].orderId %></span>
-                  <span class="order-status badge bg-secondary position-absolute top-0 end-0 m-2">
-                    <%= orders[i].status %>
-                  </span>
-                  <span class="delivery-date">| Delivery Date: January 25, 2024</span>
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-md-8">
-                      <h5>Product List</h5>
-                      <% for( let j=0; j < orders[i].orderedItems.length; j++ ) { %>
-                        <% let ProductName="hari" %>
-                          <% product.forEach(product=> { %>
-                            <% console.log("product id: ",product.id )%>
-                                        <% console.log(orders[i].orderedItems[j].product) %>
-                                        <% if (product.id==orders[i].orderedItems[j].product) { %>
-                                          <% ProductName=product.productName %>
-                                          <% } %>
-                                      <% }) %>
-                                      <div class=" order-details">
-                              <div class="d-flex justify-content-between">
-                                <span>
-                                  <%= ProductName %>
-                                </span>
-                                <span>Quantity: <%= orders[i].orderedItems[j].quantity %></span>
-                                <span>Price: ₹<%= orders[i].orderedItems[j].price %></span>
-                              </div>
-                    </div>
-                    <% } %>
-
-                  </div>
-                  <div class="col-md-4">
-                    <h5 class="order-price">Total: ₹<%= orders[i].totalPrice %>
-                    </h5>
-                    <div class="order-actions">
-                      
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              </div><br>
-              <% } %>
-                <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+<% }); %>
 
 
 

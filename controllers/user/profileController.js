@@ -203,25 +203,29 @@ const postNewPassword =async (req,res) => {
 const getuserProfile = async (req, res) => {
     try {
         const userId = req.session.user;
-        const addressData = await Address.findOne({ userId: userId })
+        const addressData = await Address.findOne({ userId: userId });
+        
         // Fetch user data based on _id
         const userData = await User.findOne({ _id: userId });
 
-        const orders = await Order.find({userId:userId})
-        const product =await Product.find({})
-        console.log('orders from profile',orders)
+        // Fetch and sort orders by the creation date in descending order (newest first)
+        const orders = await Order.find({ userId: userId }).sort({ createdOn: -1 }); // Sort by 'createdOn' field, descending order
+        const product = await Product.find({});
+        
+        console.log('orders from profile', orders);
+
         res.render('profile', {
             userData,
-            product:product,
-            orders:orders,
+            product: product,
+            orders: orders,
             userAddress: addressData,
-            
         });
     } catch (error) {
         console.log('Error in profile gathering:', error);
         res.redirect('/pageNotFound');
     }
 };
+
 
 const changeEmail = async (req, res) => {
     try {

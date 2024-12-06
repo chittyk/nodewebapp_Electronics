@@ -362,7 +362,10 @@ const postConfirmOrder = async (req, res) => {
         const user = await User.findOne({ _id: userId });
         console.log('session cart ',req.session.cart)
         const { addressIds, totalPrice, items, product, selectedOption } = req.body;
-
+        console.log("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",items,"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",product)
+        if(product.productName){
+            return res.status(500).json({ success: false, message: 'Internal server error' });
+        }
         const productIdsToRemove = items.map(item => item.productIds);
         const productCount = items.map(item => ({
             quantity: item.quantity,
@@ -590,6 +593,123 @@ const postAddAddress = async (req, res) => {
 
     }
 }
+
+const orderDetails = async (req, res) => {
+    try {
+        const orderId = req.query.id; 
+        console.log('Order ID:', orderId);
+
+        // Fetch all products from the database
+        const products = await Product.find({});
+
+        // Fetch the order by its ID
+        const orders = await Order.findOne({ orderId: orderId }).exec();
+        if (!orders) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        // Fetch the user associated with the order
+        const user = await User.findOne({ _id: orders.userId }).exec();
+        if (!user) {
+            return res.status(404).render('error', { message: 'User not found' });
+        }
+
+        // Fetch the address of the user
+        const address = await Address.findOne({ userId: orders.userId }).exec();
+        if (!address) {
+            return res.status(404).render('error', { message: 'Address not found' });
+        }
+
+        // Get the selected address
+        const selectedAddress = address.address.find(addr => addr.isSelected);
+        if (!selectedAddress) {
+            return res.status(404).render('error', { message: 'Selected address not found' });
+        }
+        
+        // Get the product IDs from the ordered items
+        const productIds = orders.orderedItems.map(item => item.product);
+
+        console.log("Product IDs:", productIds);
+
+        // Convert productIds to ObjectId objects for accurate comparison
+        const orderedProducts = products.filter(product =>
+            productIds.some(productId => productId.equals(product._id))
+        );
+        
+        console.log('Ordered Products:', orderedProducts);
+
+        console.log('Selected Address:', selectedAddress);
+
+        // Render the orderDetails view with the fetched data
+        res.render('userOrders-details', { orders, user, selectedAddress, orderedProducts });
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+
+        // Fallback if 'error' view doesn't exist
+        res.status(500).render('error', { message: 'Failed to fetch order details' });
+    }
+};
+
+
+
+
+const orderDetails1 = async (req, res) => {
+    try {
+        const orderId = req.query.id; 
+        console.log('Order ID:', orderId);
+
+        // Fetch all products from the database
+        const products = await Product.find({});
+
+        // Fetch the order by its ID
+        const orders = await Order.findOne({ orderId: orderId }).exec();
+        if (!orders) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        // Fetch the user associated with the order
+        const user = await User.findOne({ _id: orders.userId }).exec();
+        if (!user) {
+            return res.status(404).render('error', { message: 'User not found' });
+        }
+
+        // Fetch the address of the user
+        const address = await Address.findOne({ userId: orders.userId }).exec();
+        if (!address) {
+            return res.status(404).render('error', { message: 'Address not found' });
+        }
+
+        // Get the selected address
+        const selectedAddress = address.address.find(addr => addr.isSelected);
+        if (!selectedAddress) {
+            return res.status(404).render('error', { message: 'Selected address not found' });
+        }
+        
+        // Get the product IDs from the ordered items
+        const productIds = orders.orderedItems.map(item => item.product);
+
+        console.log("Product IDs:", productIds);
+
+        // Convert productIds to ObjectId objects for accurate comparison
+        const orderedProducts = products.filter(product =>
+            productIds.some(productId => productId.equals(product._id))
+        );
+        
+        console.log('Ordered Products:', orderedProducts);
+
+        console.log('Selected Address:', selectedAddress);
+
+        // Render the orderDetails view with the fetched data
+        res.render('userOrders-details', { orders, user, selectedAddress, orderedProducts });
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+
+        // Fallback if 'error' view doesn't exist
+        res.status(500).render('error', { message: 'Failed to fetch order details' });
+    }
+};
+
+
 module.exports = {
     postCart,
     getCart,
@@ -605,6 +725,8 @@ module.exports = {
     returnOrder,
     cancellReturnOrder,
     addAddress,
-    postAddAddress
+    postAddAddress,
+    orderDetails,
+    orderDetails1    
 
 }

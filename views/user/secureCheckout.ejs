@@ -343,6 +343,7 @@
                         text: "No Address is selected",
                     })
                 }
+                
                 if (!selectedOption) {
                     Swal.fire({
                         icon: "warning",
@@ -355,10 +356,25 @@
                 console.log(`Selected Payment Method: ${selectedOption.value}`);
                 let totalPrice = document.getElementById("totalPriceDisplay").textContent.replace("Total Price: ₹", "").trim();
                 let addressIds = document.getElementById('addressIds').value
-
+                if(!product.productName){
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Add Address ",
+                        text: "No Address is selected",
+                    })
+                    
+                }
                 // AJAX request to send order data to the server
                 console.log('hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo', totalPrice)
                 console.log('addressId', addressIds)
+                if(product.length<=0){
+                    Swal.fire({
+                        icon: "warning",
+                        title: " error ",
+                        text: "Already ordered",
+                    })
+                    
+                }else{
                 $.ajax({
                     url: '/confirmOrder',
                     method: 'POST',
@@ -381,7 +397,10 @@
                                 title: "Order Has Been Placed Successfully",
                                 showConfirmButton: false,
                                 timer: 1500,
-                            });
+                            }).then(() => {
+                // Redirect to home page after success message
+                window.location.href = `/shop`;
+            });
                             
                         } else {
                             Swal.fire({
@@ -399,7 +418,7 @@
                             text: "Something went wrong!",
                         });
                     },
-                });
+                });}
             }
 
         </script>

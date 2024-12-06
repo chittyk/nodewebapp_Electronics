@@ -602,48 +602,49 @@ const logout = async (req, res) => {
     res.redirect('/pageNotFound')
   }
 }
-
-const loadShop = async (req,res) => {
+const loadShop = async (req, res) => {
   try {
-    const sortBy = req.query.sortBy || 'default'; // Use 'default' if sortBy is undefined
-  
-    const user =req.session.user
-    const userData =await User.findOne({_id:user})
-    const categories =await Category.find({isListed:true})
-    const categoryIds = categories.map((category)=>category._id.toString())
-    const page = parseInt(req.query.page) || 1
-    const limit = 9
-    const skip =(page-1)*limit
+    const user = req.session.user;
+    const userData = await User.findOne({ _id: user });
+    const categories = await Category.find({ isListed: true });
+    const categoryIds = categories.map(category => category._id.toString());
+    
+    const page = parseInt(req.query.page) || 1;  // Get page number from query params
+    const limit = 4;
+    const skip = (page - 1) * limit;  // Calculate products to skip for pagination
+
     const products = await Product.find({
-      isBlocked:false,
-      category:{$in:categoryIds},
-      quantity:{$gt:0},
-    }).sort({createdOn:-1}).skip(skip).limit(limit)
-
-    const totalProduct = await Product.countDocuments({
-      isBlocked:false,
-      category:{$in:categoryIds},
-      quantity:{$gt:0}
+      isBlocked: false,
+      category: { $in: categoryIds },
+      quantity: { $gt: 0 },
     })
-    const totalPages =Math.ceil(totalProduct/limit)
+    .sort({ createdOn: -1 })
+    .skip(skip)
+    .limit(limit);  // Apply limit for pagination
 
-    const brands =await Brand.find({isBlocked:false})
-    const categoriesWithIds = categories.map(category =>({_id:category._id , name:category.name}))
+    const totalProducts = await Product.countDocuments({
+      isBlocked: false,
+      category: { $in: categoryIds },
+      quantity: { $gt: 0 }
+    });
 
-    res.render('shop',{
-      userData:userData,
-      products:products,
-      category:categoriesWithIds,
-      brand :brands,
-      totalProducts:totalProduct,
-      currentPage :page,
-      totalPages:totalPages,
-      sortBy:sortBy
-    })
+    const totalPages = Math.ceil(totalProducts / limit);  // Calculate total pages
+
+    const brands = await Brand.find({ isBlocked: false });
+
+    res.render('shop', {
+      userData,
+      products,
+      category: categories,
+      brand: brands,
+      totalProducts,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
-    res.redirect('/pageNotFound')
+    res.redirect('/pageNotFound');
   }
-}
+};
 const filterProduct = async (req, res) => {
   try {
     const user = req.session.user;
