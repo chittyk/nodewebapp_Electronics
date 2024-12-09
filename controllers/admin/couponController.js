@@ -51,16 +51,17 @@ const editCoupon = async (req, res) => {
 }
 const postEditCoupon = async (req, res) => {
     try {
+        console.log('hello')
         console.log(req.body)
         const data = req.body
-        const id = req.body.id
-        const couponData = await Coupon.findOne({ _id: id })
+
+        const couponData = await Coupon.findOne({ _id: data.couponId })
         if (!couponData) {
             return res.status(404).json({ message: 'Coupon not found', success: false })
         }
         await Coupon.updateOne(
             {
-                _id: id
+                _id: data.couponId
             },
             {
                 $set: {
@@ -79,9 +80,31 @@ const postEditCoupon = async (req, res) => {
     }
 }
 
+const deleteCoupon = async (req, res) => {
+    try {
+        console.log('hello')
+        const id = req.query.id
+        console.log('id:',id)
+        const findCoupon =await Coupon.findOne({ _id: id })
+        if (!findCoupon) {
+            return res.status(404).json({ message: 'Coupon not found', success: false })
+        }
+        await Coupon.deleteOne({ _id: id })
+        return res.status(200).json({success:true,message:"it deleted successfully"})
+    } catch (error) {
+        console.log(error)
+
+        res.status(500).json({ message: 'Internal Server Error', success: false })
+    }
+
+}
+
+
+
 module.exports = {
     getCoupon,
     createCoupon,
     editCoupon,
-    postEditCoupon
+    postEditCoupon,
+    deleteCoupon
 }

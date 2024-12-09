@@ -61,7 +61,7 @@
    <div class="card-body">
      <div class="row">
        <div class="col-12">
-         <form id="coupon-form" method="post" action="/admin/editCoupon">
+         <form id="coupon-form" >
            <body onload="setDefaultStartDate(),setDefaultendDate()"></body>
            <input type="hidden" id="coupon-id" value="<%= findCoupon._id %>" />
            <div class="mb-4">
@@ -250,8 +250,9 @@
 
 
  function updateCoupon() {
+    console.log('start')
  $.ajax({
-   url: "/admin/editCoupon",
+   url: "/admin/postEditCoupon",
    method: "post",
    data: {
      couponId: document.getElementById("coupon-id").value,
@@ -262,6 +263,7 @@
      minimumPrice: document.getElementById("minimum-price").value,
    },
    success: function(response) {
+    console.log("success")
      Swal.fire({
        icon: "success",
        title: "Success",
@@ -272,6 +274,7 @@
      });
    },
    error: function(xhr, status, error) {
+    console.log('fails')
      Swal.fire({
        icon: "error",
        title: "Error",
