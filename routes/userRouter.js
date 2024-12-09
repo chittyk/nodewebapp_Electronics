@@ -118,6 +118,7 @@ router.post('/editAddressCart1',userAuth,cartController.postEditAddress1)
 router.post('/updateAddress', userAuth, cartController.updateAddress);
 router.get('/changeAddress',userAuth,cartController.changeAddress)
 router.post('/confirmOrder',removeCartSession,userAuth,cartController.postConfirmOrder);
+//create the new router
 
 router.post('/cancelOrder',userAuth,cartController.cancelOrder)
 router.post('/returnOrder',userAuth,cartController.returnOrder)

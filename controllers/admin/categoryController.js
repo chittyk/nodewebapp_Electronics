@@ -33,12 +33,12 @@ const categoryInfo = async (req, res) => {
 const addCategory = async (req, res) => {
   const { name, description } = req.body;
   try {
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({ name: name.toLowerCase() });
     if (existingCategory) {
       return res.status(400).json({ status: false, message: "Category already exists" });
     }
 
-    const newCategory = new Category({ name, description });
+    const newCategory = new Category({ name: name.toLowerCase(), description });
     await newCategory.save();
     return res.json({ status: true, message: "Category added successfully" });
   } catch (error) {

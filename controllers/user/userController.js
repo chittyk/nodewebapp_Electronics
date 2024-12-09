@@ -524,8 +524,8 @@ const verifyOtp = async (req, res) => {
         res.status(500).json({ success: false, message: "Could not create user" });
       }
     } else {
-      res.status(400).json({ success: false, message: "Invalid OTP, Please Try again" });
-    }
+  res.status(400).json();
+}
   } catch (error) {
     console.error("Error in OTP verification:", error);
     res.status(500).json({ success: false, message: "An Error occurred" });

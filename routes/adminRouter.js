@@ -12,7 +12,9 @@ const brandController =require('../controllers/admin/brandController');
 const { authenticate } = require('passport');
 const BannerController =require('../controllers/admin/bannerController');
 const Banner = require('../models/BannerSchema');
+const couponController=require('../controllers/admin/couponController')
 const orderController =require("../controllers/admin/orderController");
+
 //pageNotFound
 router.get("/pageNotFound",adminAuth,adminController.pageNotFound)
 
@@ -76,5 +78,11 @@ router.post('/update-order-status',adminAuth,orderController.updateOrders);
 
 router.get('/orderDetails', adminAuth, orderController.orderDetails);
 
+
+//coupon management 
+router.get('/coupon', adminAuth, couponController.getCoupon)
+router.post('/createCoupon',adminAuth, couponController.createCoupon)
+router.get('/editCoupon',adminAuth,couponController.editCoupon)
+router.post('/editCoupon',adminAuth,couponController.postEditCoupon)
 
 module.exports = router;

@@ -26,13 +26,13 @@
                                 <div id="countdown" class="text-center text-danger mb-3"></div> <!-- Countdown Timer -->
                             </div>
                             <div>
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                                <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]">
-                            </div>
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);" onkeyup="if(this.value.length == 1) { this.nextElementSibling.focus(); }">
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);" onkeyup="if(this.value.length == 1) { this.nextElementSibling.focus(); }">
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);" onkeyup="if(this.value.length == 1) { this.nextElementSibling.focus(); }">
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);" onkeyup="if(this.value.length == 1) { this.nextElementSibling.focus(); }">
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);" onkeyup="if(this.value.length == 1) { this.nextElementSibling.focus(); }">
+    <input type="number" class="otp-input w-14 h-14" maxlength="1" name="otp[]" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,1);">
+</div>
 
                             <div class="flex items-center flex-col space-y-5">
                                 <button
@@ -93,21 +93,26 @@
             return false; // Prevent default form submission
         }
 
-        function handleStatusCode(statusCode, message) {
-            const titles = {
-                400: 'Invalid Request',
-                401: 'Unauthorized',
-                403: 'Forbidden',
-                404: 'Not Found',
-                500: 'Server Error'
-            };
-            const title = titles[statusCode] || 'Error';
-            Swal.fire({
-                icon: 'error',
-                title: title,
-                text: message || 'An unexpected error occurred.',
-            });
-        }
+       function handleStatusCode(statusCode, message) {
+    const titles = {
+        400: 'Invalid Request',
+        401: 'Unauthorized',
+        403: 'Forbidden',
+        404: 'Not Found',
+        500: 'Server Error'
+    };
+    const title = titles[statusCode] || 'Error';
+    Swal.fire({
+        icon: 'error',
+        title: title,
+        text: message || 'Invalid Otp',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        cancelButtonText: 'Cancel',
+        cancelButtonColor: '#d33',
+        showCancelButton: true
+    });
+}
 
         function resendOTP() {
             clearInterval(timerInterval); // Clear existing timer
