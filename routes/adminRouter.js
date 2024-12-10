@@ -85,4 +85,5 @@ router.post('/createCoupon',adminAuth, couponController.createCoupon)
 router.get('/editCoupon',adminAuth,couponController.editCoupon)
 router.post('/postEditCoupon',adminAuth,couponController.postEditCoupon)
 router.post('/deleteCoupon',adminAuth,couponController.deleteCoupon)
+
 module.exports = router;

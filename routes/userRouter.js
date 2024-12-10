@@ -33,6 +33,8 @@ const passport = require('passport');
 const profileController =require('../controllers/user/profileController')
 const cartController =require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
+const couponController=require("../controllers/user/couponController")
+
 
 // Routes
 router.get('/pageNotFound', userController.pageNotFound);
@@ -125,6 +127,9 @@ router.post('/returnOrder',userAuth,cartController.returnOrder)
 router.post('/cancellReturnOrder',userAuth,cartController.cancellReturnOrder)
 router.get('/orderDetails',userAuth,cartController.orderDetails)
 router.get('/orderDetails1',userAuth,cartController.orderDetails1)
+
+//coupon management
+router.post('/checkCoupon',userAuth,couponController.checkCoupon)
 module.exports = router;
 
 

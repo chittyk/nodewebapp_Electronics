@@ -244,7 +244,7 @@
                             </div>
                         </div> <br><br>
                 </div>
-
+                
                 <!-- Right side: Products and Total Price -->
                 <div class="col-md-6">
                     <% let totalPrice=0%>
@@ -254,57 +254,57 @@
                                 <ul class="list-unstyled">
                                     <!-- Check if there are products -->
                                     <% if (product.length) { %>
-
-                                        <% for(let i=0; i < product.length; i++) { %>
+                                        <% for(let i = 0; i < product.length; i++) { %>
                                             <li class="d-flex justify-content-between mb-3">
                                                 <div class="d-flex align-items-center">
                                                     <!-- Product Image -->
-                                                    <img src="/uploads/product-images/<%= product[i].productImage[0] %>"
-                                                        alt="Product Image" class="img-thumbnail"
-                                                        style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                                    <img src="/uploads/product-images/<%= product[i].productImage[0] %>" 
+                                                         alt="Product Image" class="img-thumbnail" 
+                                                         style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
                                                     <!-- Product Name -->
-                                                    <% let count=0 %>
-                                                        <% for( let j=0; j < items.length; j++ ) { %>
-                                                            <% console.log("items[j]",items[j].productIds) %>
-                                                                <% console.log("product[i]",product[i]._id) %>
-                                                                    <% if (items[j].productIds==product[i]._id) { %>
-                                                                        <% console.log("success") %>
-                                                                            <% count=items[j].quantity %>
-
-                                                                                <% } %>
-                                                                                    <% } %>
-                                                                                        <% console.log(count) %>
-                                                                                            <span>
-                                                                                                <%= product[i].productName
-                                                                                                    %> <b>(qty: X<%=
-                                                                                                            count %>
-                                                                                                            )</b>
-                                                                                            </span>
+                                                    <% let count = 0; %>
+                                                    <% for(let j = 0; j < items.length; j++) { %>
+                                                        <% if (items[j].productIds == product[i]._id) { %>
+                                                            <% count = items[j].quantity; %>
+                                                        <% } %>
+                                                    <% } %>
+                                                    <span>
+                                                        <%= product[i].productName %> <b>(qty: x<%= count %>)</b>
+                                                    </span>
                                                 </div>
                                                 <!-- Product Price -->
                                                 <strong>₹ <%= product[i].salePrice * count %></strong>
-                                                <% totalPrice=(product[i].salePrice * count) + totalPrice %>
-
-
+                                                <% totalPrice = (product[i].salePrice * count) + totalPrice; %>
                                             </li>
-
-                                            <% } %>
-                                                <% } %>
-                                                    <strong class="d-flex justify-content-end">Delivery Charge
-                                                        +₹80</strong>
-                                                    <strong class="d-flex justify-content-end">GST +₹40</strong>
-                                                    <% totalPrice=totalPrice + 80+ 40 %>
-                                                        <% if (totalPrice> 500) { %>
-
-                                                            <strong class="d-flex justify-content-end">Free Delivery
-                                                                -₹80</strong>
-                                                            <% totalPrice=totalPrice - 80 %>
-
-                                                                <% } %>
-
-
+                                        <% } %>
+                                    <% } %>
                                 </ul>
+                            
+                                <!-- Additional Charges -->
+                                <strong class="d-flex justify-content-end">Delivery Charge +₹80</strong>
+                                <strong class="d-flex justify-content-end">GST +₹40</strong>
+                                <% totalPrice = totalPrice + 80 + 40; %>
+                                <% if (totalPrice > 500) { %>
+                                    <strong class="d-flex justify-content-end">Free Delivery -₹80</strong>
+                                    <% totalPrice = totalPrice - 80; %>
+                                <% } %>
+                            
+                                <!-- Coupon Code Section -->
+                                <div class="mt-4">
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox" class="form-check-input" id="enableCoupon">
+                                        <label for="enableCoupon" class="form-check-label">Use Coupon Code</label>
+                                    </div>
+                                    <input type="text" class="form-control" id="couponCode" name="couponCode" placeholder="Enter coupon code" disabled>
+                                    <button class="btn btn-primary mt-2" onclick="applyCoupon()" id="applyCoupon" disabled>Apply Coupon</button>
+                                </div>
+                            
+                                <!-- Total Price -->
+                                <div class="d-flex justify-content-end mt-3">
+                                    <strong>Total Price: ₹<%= totalPrice %></strong>
+                                </div>
                             </div>
+                            
                         </div>
 
 
@@ -319,6 +319,7 @@
                 </div>
             </div>
 
+
             <!-- Confirm Button -->
             <div class="text-center">
                 <button type="submit" class="btn btn-primary btn-lg w-100"
@@ -329,6 +330,60 @@
             </div>
         </div>
 
+        <script>
+            function applyCoupon(){
+                const couponCode =document.getElementById('couponCode').value
+                if(!couponCode){
+                    alert('Please enter coupon code')
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "No Valid Coupon Code Entered",
+                        
+                    });
+                }
+                $.ajax({
+                    url:'/checkCoupon',
+                    method:'POST',
+                    data:{code:couponCode},
+                   success:function(response){
+    
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: "Coupon Applied Successfully",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+    
+                    },
+                    error:function(error){
+                        console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",error.responseJSON.message)
+                        Swal.fire({
+                                position: "top-end",
+                                icon: "error",
+                                title: error.responseJSON.message || "No matching coupon code",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            console.log('errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',error)
+                    }
+
+                })
+            }
+        </script>
+
+        <script>
+            const enableCouponCheckbox = document.getElementById('enableCoupon');
+            const couponCodeInput = document.getElementById('couponCode');
+            const applyCouponButton = document.getElementById('applyCoupon');
+        
+            enableCouponCheckbox.addEventListener('change', () => {
+                const isChecked = enableCouponCheckbox.checked;
+                couponCodeInput.disabled = !isChecked;
+                applyCouponButton.disabled = !isChecked;
+            });
+        </script>
         <script>
             function confirmOrder(items, product ,addresss) {
                 console.log('Order confirmation initiated...');

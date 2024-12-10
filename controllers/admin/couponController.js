@@ -5,6 +5,22 @@ const Coupon = require('../../models/couponSchema')
 const getCoupon = async (req, res) => {
     try {
         const findCoupons = await Coupon.find({})
+        findCoupons.forEach(coupon => {
+            if (coupon.expireOn < new Date()) {
+                coupon.isList = false
+            }else{
+                coupon.isList=true
+            }
+        })
+        await Coupon.bulkWrite(findCoupons.map(coupon => ({
+            updateOne: {
+                filter: { _id: coupon._id },
+                update: { $set: { isList: coupon.isList } }
+            }
+        })))
+
+        
+
 
         return res.render('coupon', { coupons: findCoupons })
     } catch (error) {
@@ -84,13 +100,13 @@ const deleteCoupon = async (req, res) => {
     try {
         console.log('hello')
         const id = req.query.id
-        console.log('id:',id)
-        const findCoupon =await Coupon.findOne({ _id: id })
+        console.log('id:', id)
+        const findCoupon = await Coupon.findOne({ _id: id })
         if (!findCoupon) {
             return res.status(404).json({ message: 'Coupon not found', success: false })
         }
         await Coupon.deleteOne({ _id: id })
-        return res.status(200).json({success:true,message:"it deleted successfully"})
+        return res.status(200).json({ success: true, message: "it deleted successfully" })
     } catch (error) {
         console.log(error)
 
