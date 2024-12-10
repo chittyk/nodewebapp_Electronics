@@ -5,7 +5,7 @@ const { render } = require("ejs");
 const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderSchema")
 const mongoose = require('mongoose')
-
+const Coupon=require('../../models/couponSchema')
 
 const getCart = async (req, res) => {
     try {
@@ -198,12 +198,20 @@ const getCheckout = async (req, res) => {
             product: ids
         }
 
+
+        const coupon = await Coupon.findOne({ UserId:userId  });
+        console.log("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",coupon)
+        
+
+
+
         // Render the checkout page with user address, selected products, and items
         res.render('secureCheckout', {
             userData: user,
             userAddress: userAddress,
             items: items,
             product: ids,
+            coupon:coupon
             // Pass the products to the view
         });
 
@@ -375,8 +383,12 @@ const postConfirmOrder = async (req, res) => {
         const userAddress = await Address.findOne({ userId: userId })
         console.log('addressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss', userAddress)
         const selectedAddress = userAddress.address.find((addr) => addr.isSelected);
-
-
+        const coupon = await Coupon.findOne({ UserId: userId});
+        console.log('55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555',coupon)
+        let couponStatus =false
+        if(coupon){
+            couponStatus=true
+        }
         console.log('Selected Address:', selectedAddress);
 
         // Initialize order items array
@@ -411,7 +423,8 @@ const postConfirmOrder = async (req, res) => {
             address: selectedAddress ? selectedAddress._id : addresss.address[index]._id, // Handle if selectedAddress is undefined
             status: 'pending',
             createdOn: new Date(),
-            paymentMethod: selectedOption
+            paymentMethod: selectedOption,
+            couponApplied : couponStatus
         });
 
         await order.save(); // Save the order to the database

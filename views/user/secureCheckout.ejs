@@ -284,12 +284,19 @@
                                 <strong class="d-flex justify-content-end">Delivery Charge +₹80</strong>
                                 <strong class="d-flex justify-content-end">GST +₹40</strong>
                                 <% totalPrice = totalPrice + 80 + 40; %>
+
                                 <% if (totalPrice > 500) { %>
                                     <strong class="d-flex justify-content-end">Free Delivery -₹80</strong>
                                     <% totalPrice = totalPrice - 80; %>
                                 <% } %>
+
+                                <% if (coupon ) { %>
+                                    <strong class="d-flex justify-content-end">Coupon Discount -₹<%= coupon.offerPrice %></strong>
+                                    <% totalPrice = totalPrice -  coupon.offerPrice %>
+                                <% } %>
                             
-                                <!-- Coupon Code Section -->
+                                <% if (!coupon) { %>
+                                                                 <!-- Coupon Code Section -->
                                 <div class="mt-4">
                                     <div class="form-check mb-2">
                                         <input type="checkbox" class="form-check-input" id="enableCoupon">
@@ -298,6 +305,7 @@
                                     <input type="text" class="form-control" id="couponCode" name="couponCode" placeholder="Enter coupon code" disabled>
                                     <button class="btn btn-primary mt-2" onclick="applyCoupon()" id="applyCoupon" disabled>Apply Coupon</button>
                                 </div>
+                                <% } %>    
                             
                                 <!-- Total Price -->
                                 <div class="d-flex justify-content-end mt-3">
@@ -333,6 +341,7 @@
         <script>
             function applyCoupon(){
                 const couponCode =document.getElementById('couponCode').value
+                let totalPrice = document.getElementById("totalPriceDisplay").textContent.replace("Total Price: ₹", "").trim();
                 if(!couponCode){
                     alert('Please enter coupon code')
                     Swal.fire({
@@ -345,7 +354,9 @@
                 $.ajax({
                     url:'/checkCoupon',
                     method:'POST',
-                    data:{code:couponCode},
+                    data:{code:couponCode,
+                        totalPrice:totalPrice
+                    },
                    success:function(response){
     
                         Swal.fire({
@@ -355,6 +366,7 @@
                             showConfirmButton: false,
                             timer: 1500
                         });
+                        location.reload()
     
                     },
                     error:function(error){

@@ -37,6 +37,7 @@
                         <th>Customer Name</th>
                         <th>Total Price</th>
                         <th>Status</th>
+                        <th>Coupon</th>
                         <th>Date Ordered</th>
                         <th>Actions</th>
                     </tr>
@@ -59,6 +60,20 @@
                             <td id="status-<%= order.orderId %>">
                                 <%= order.status %>
                             </td>
+
+                            <td>
+                                <% if (order.couponApplied==true) {%>
+                                    <div class="badge bg-success text-wrap" style="width: 3rem;">
+                                        Applied
+                                    </div>
+                                    <% } else {%>
+                                        <div class="badge bg-warning text-wrap" style="width: 3rem;">
+                                            Not Applied
+                                        </div>
+                                        <% } %>
+
+                            </td>
+
                             <td>
                                 <%= new Date(order.createdOn).toLocaleDateString('en-US') %>
                                     <%= new Date(order.createdOn).toLocaleTimeString('en-US') %>
@@ -181,7 +196,7 @@
                             // Handle the response, e.g., display order details in a modal
                             Swal.fire({
                                 title: 'Order Details',
-                                         // Example display
+                                // Example display
                                 icon: 'info'
                             });
                         },
