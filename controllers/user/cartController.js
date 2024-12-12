@@ -1,11 +1,20 @@
-const Cart = require("../../models/cartSchema")
-const User = require("../../models/userSchema")
-const Product = require('../../models/productSchema');
-const { render } = require("ejs");
-const Address = require("../../models/addressSchema");
-const Order = require("../../models/orderSchema")
-const mongoose = require('mongoose')
-const Coupon=require('../../models/couponSchema')
+    const Cart = require("../../models/cartSchema")
+    const User = require("../../models/userSchema")
+    const Product = require('../../models/productSchema');
+    const { render } = require("ejs");
+    const Address = require("../../models/addressSchema");
+    const Order = require("../../models/orderSchema")
+    const mongoose = require('mongoose')
+    const Coupon=require('../../models/couponSchema')
+    const crypto = require('crypto');
+    // const env = require('dotenv').config();  
+    require('dotenv').config();
+    const Razorpay = require('razorpay');
+    const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID, // Correct mapping
+        key_secret: process.env.RAZORPAY_KEY_SECRET, // Correct mapping
+    });
+
 
 const getCart = async (req, res) => {
     try {
@@ -363,14 +372,14 @@ const changeAddress = async (req, res) => {
 }
 const postConfirmOrder = async (req, res) => {
     try {
-
-        console.log('hello1');
+        
+        console.log('hello1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111');
         const userId = req.session.user; // Fix typo
         console.log("userid ", userId)
         const user = await User.findOne({ _id: userId });
-        console.log('session cart ',req.session.cart)
+        // console.log('session cart ',req.session.cart)
         const { addressIds, totalPrice, items, product, selectedOption } = req.body;
-        console.log("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",items,"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",product)
+        // console.log("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",items,"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",product)
         if(product.productName){
             return res.status(500).json({ success: false, message: 'Internal server error' });
         }
@@ -381,15 +390,15 @@ const postConfirmOrder = async (req, res) => {
         }));
         // Fetch address details
         const userAddress = await Address.findOne({ userId: userId })
-        console.log('addressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss', userAddress)
+        // console.log('addressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss', userAddress)
         const selectedAddress = userAddress.address.find((addr) => addr.isSelected);
         const coupon = await Coupon.findOne({ UserId: userId});
-        console.log('55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555',coupon)
+        // console.log('55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555',coupon)
         let couponStatus =false
         if(coupon){
             couponStatus=true
         }
-        console.log('Selected Address:', selectedAddress);
+        // console.log('Selected Address:', selectedAddress);
 
         // Initialize order items array
         let ItemArr = [];
@@ -410,7 +419,7 @@ const postConfirmOrder = async (req, res) => {
             ItemArr.push(arrayItem);
         }
 
-        console.log("Order Items:", ItemArr);
+        // console.log("Order Items:", ItemArr);
 
 
 
@@ -429,7 +438,7 @@ const postConfirmOrder = async (req, res) => {
 
         await order.save(); // Save the order to the database
 
-        console.log("orderrsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss", order)
+        // console.log("orderrsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss", order)
 
         // const newOrder = await Order.findOne({userId:userId})
         await Cart.updateOne(
@@ -461,11 +470,11 @@ const postConfirmOrder = async (req, res) => {
             { $push: { orderHistory: order._id } }
         )
 
-
+        
         return res.status(200).json({ success: true, message: 'Order placed successfully', order });
     } catch (error) {
-        console.log('hello2');
-        console.error('Error in postConfirmOrder:', error);
+         console.log('hello2');
+        // console.error('Error in postConfirmOrder:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
@@ -723,6 +732,60 @@ const orderDetails1 = async (req, res) => {
 };
 
 
+const createRazorpayOrder = async (req, res) => {
+    try {
+        console.log('Creating Razorpay Order...');
+
+        const { amount } = req.body;
+        if (!amount || isNaN(amount)) {
+            return res.status(400).json({ error: "Invalid amount provided" });
+        }
+
+        const options = {
+            amount: amount * 100, // Convert to paise
+            currency: "INR",
+            receipt: `receipt_${Date.now()}`,
+        };
+
+        console.log("Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
+        
+        const order = await razorpay.orders.create(options);
+        
+        res.json({
+            success: true,
+            key: process.env.RAZORPAY_KEY_ID,
+            amount: options.amount,
+            currency: options.currency,
+            order_id: order.id,
+        });
+
+        
+
+        
+        console.log('ists done ')
+    } catch (error) {
+        console.error("Error creating Razorpay order:", error);
+        res.status(500).send("Error creating Razorpay order");
+    }
+}
+
+const verifyRazorpayPayment = async(req,res)=>{
+    const { payment_id, order_id, signature } = req.body;
+    console.log("dffffffdfffffffffffffffffffdfffffffffffffffffffffffffdddddddddddddddddddddddddddfffffffffffffffff",req.body)
+    const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(order_id + "|" + payment_id)
+        .digest('hex');
+
+    if (generatedSignature === signature) {
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ success: false, message: "Invalid payment signature" });
+    }
+}
+
+
+
+
 module.exports = {
     postCart,
     getCart,
@@ -740,6 +803,8 @@ module.exports = {
     addAddress,
     postAddAddress,
     orderDetails,
-    orderDetails1    
+    orderDetails1,
+    createRazorpayOrder,
+    verifyRazorpayPayment
 
 }
