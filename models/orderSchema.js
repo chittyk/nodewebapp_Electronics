@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Razorpay = require('razorpay');
 const {Schema} =mongoose
 const {v4:uuidv4, stringify}=require('uuid');
 
@@ -69,6 +70,10 @@ const orderSchema = new Schema({
         enum:['card','net-banking','upi','emi','cod','razorpay'],
         default:'cod'
     },
+    RazorpayOrderId:{
+        type:String,
+        default:"none"
+    }
 })
 
 

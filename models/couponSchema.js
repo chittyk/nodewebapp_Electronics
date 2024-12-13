@@ -29,6 +29,10 @@ const couponSchema = new Schema({
         type:Boolean,
         default:true
     },
+    status:{
+        type:Boolean,
+        default:false
+    },
     UserId:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'

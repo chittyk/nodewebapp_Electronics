@@ -33,7 +33,7 @@ const checkCoupon = async (req, res) => {
         console.log('6')
 
         coupon.UserId.push(userid)
-        coupon.isList = false
+        coupon.status = true
         await coupon.save()
         // await Order.updateOne({userId:userid},{$set:{couponApplied:true}})
         // const order = await Order.findOne({userId:userid})
