@@ -211,7 +211,7 @@ const getCheckout = async (req, res) => {
         }
 
 
-        const coupon = await Coupon.findOne({ UserId:userId  });
+        const coupon = await Coupon.findOne({ UserId:userId,status:true  });
         console.log("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",coupon)
         
 
@@ -381,7 +381,7 @@ const postConfirmOrder = async (req, res) => {
         console.log("userid ", userId)
         const user = await User.findOne({ _id: userId });
         console.log('session cart ',req.session.cart)
-        const { addressIds, totalPrice, items, product, selectedOption } = req.body;
+        const { addressIds, totalPrice, items, product, selectedOption,razorpay_order_id } = req.body;
         console.log("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",items,"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",product)
         if(product.productName){
             return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -438,7 +438,8 @@ const postConfirmOrder = async (req, res) => {
             status: 'pending',
             createdOn: new Date(),
             paymentMethod: selectedOption,
-            couponApplied : couponStatus
+            couponApplied : couponStatus,
+            RazorpayOrderId:razorpay_order_id
         });
 
         await order.save(); // Save the order to the database

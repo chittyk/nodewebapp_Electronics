@@ -39,7 +39,7 @@
                                                 </td>
                                                 <td class="product-des product-name">
                                                     <h5 class="product-name">
-                                                        <a href="">
+                                                        <a href="/detailProduct?id=<%= product._id %>">
                                                             <%= product.productName %>
                                                         </a>
                                                     </h5>
@@ -58,7 +58,7 @@
 
                                                         </span></td>
                                                 <td class="text-center" data-title="Add to Cart">
-                                                    <a href="#" onclick="" class="btn btn-sm">Add to Cart</a>
+                                                    <a href="#" onclick="addToCart('<%= product._id %>')" class="btn btn-sm">Add to Cart</a>
                                                 </td>
                                                 <td class="action" data-title="Remove">
                                                     <a class="btn btn-sm bg-danger" href="#"
@@ -101,5 +101,46 @@
             });
         }
     </script>
+
+    <script>
+        function addToCart(productId) {
+      
+
+      // AJAX call to add the product to the cart
+      $.ajax({
+          url: '/cart', // Backend route to handle adding to the cart
+          method: 'POST',
+          contentType: 'application/json', // Set content type to JSON
+          data: JSON.stringify({ productId }), // Send only productId
+          success: (response) => {
+              if (response.status === 'success') {
+                  Swal.fire({
+                      title: 'Added to Cart',
+                      text: 'The product has been added to your cart successfully.',
+                      icon: 'success',
+                      timer: 2000,
+                  });
+              }
+              else {
+                  Swal.fire({
+                      title: 'Error',
+                      text: response.message || 'Could not add to cart.',
+                      icon: 'error',
+                      timer: 2000,
+                  });
+              }
+          },
+          error: (xhr, status, error) => {
+              Swal.fire({
+                  title: 'Error',
+                  text: xhr.responseJSON?.message || 'An error occurred.',
+                  icon: 'error',
+                  timer: 2000,
+              });
+          },
+      });
+  }
+    </script>
+
     <%- include("../../views/partials/user/footer") %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

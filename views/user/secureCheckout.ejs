@@ -259,7 +259,7 @@
                 const couponCode =document.getElementById('couponCode').value
                 let totalPrice = document.getElementById("totalPriceDisplay").textContent.replace("Total Price: ₹", "").trim();
                 if(!couponCode){
-                    alert('Please enter coupon code')
+                    // alert('Please enter coupon code')
                     Swal.fire({
                         icon: "error",
                         title: "Oops...",
@@ -282,7 +282,8 @@
                             showConfirmButton: false,
                             timer: 1500
                         });
-                        location.reload()
+                        location.reload
+                        // alert('sussus')
     
                     },
                     error:function(error){
@@ -322,7 +323,63 @@
 
 
         <script>
-            function confirmOrder(items, product ,addresss) {
+            
+
+
+
+            function placeOrder(addressIds,totalPrice,items,product,selectedOption,razorpay_order_id){
+                $.ajax({
+                            url: '/confirmOrder',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                addressIds: addressIds,
+                                totalPrice: totalPrice,
+                                items: items,
+                                product: product,
+                                selectedOption: selectedOption,
+                                razorpay_order_id:razorpay_order_id
+
+                            }),
+                            success: (response) => {
+                                console.log('Server response:', response);
+
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "Order Has Been Placed Successfully",
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                    }).then(() => {
+                                        // Redirect to home page after success message
+                                        window.location.href = `/shop`;
+                                    });
+                                    
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: response.message || "Error in placing order.",
+                                    });
+                                }
+                            },
+                            error: (error) => {
+                                console.error('AJAX error:', error.responseText || error.statusText);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: "Something went wrong!",
+                                });
+                            },
+                        });
+            }
+
+
+
+
+
+            async  function confirmOrder(items, product ,addresss) {
                 console.log('Order confirmation initiated...');
                 console.log('Items:', items);
                 console.log('Product:', product);
@@ -348,14 +405,7 @@
                 console.log(`Selected Payment Method: ${selectedOption.value}`);
                 let totalPrice = document.getElementById("totalPriceDisplay").textContent.replace("Total Price: ₹", "").trim();
                 let addressIds = document.getElementById('addressIds').value
-                if(!product.productName){
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Add Address ",
-                        text: "No Address is selected",
-                    })
-                    
-                }
+                
                 // AJAX request to send order data to the server
                 console.log('hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo', totalPrice)
                 console.log('addressId', addressIds)
@@ -367,50 +417,75 @@
                     })
                     
                 }else{
-                $.ajax({
-                    url: '/confirmOrder',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        addressIds: addressIds,
-                        totalPrice: totalPrice,
-                        items: items,
-                        product: product,
-                        selectedOption: selectedOption.value,
+                    console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",selectedOption.value)
+                    if(selectedOption.value === 'cod'){
+                        placeOrder(addressIds,totalPrice,items,product,selectedOption.value,'none')
+                    }else if(selectedOption.value=='razorpay'){
 
-                    }),
-                    success: (response) => {
-                        console.log('Server response:', response);
-
-                        if (response.success) {
-                            Swal.fire({
-                                position: "top-end",
-                                icon: "success",
-                                title: "Order Has Been Placed Successfully",
-                                showConfirmButton: false,
-                                timer: 1500,
-                            }).then(() => {
-                // Redirect to home page after success message
-                window.location.href = `/shop`;
-            });
-                            
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: response.message || "Error in placing order.",
-                            });
-                        }
-                    },
-                    error: (error) => {
-                        console.error('AJAX error:', error.responseText || error.statusText);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Oops...",
-                            text: "Something went wrong!",
+                        // alert("hello")
+                        const response = await fetch('/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount:  totalPrice*100 }), // Amount in paise (10000 = ₹100)
                         });
-                    },
-                });}
+
+                        const order = await response.json();
+
+                        const options = {
+                            key: 'rzp_test_D64ckPQSXSWgra', // Replace with your API key_id
+                            amount: order.amount,
+                            currency: order.currency,
+                            name: 'DiyElectro',
+                            description: 'Payment session',
+                            order_id: order.id,
+                            handler: function (response) {
+                                // alert('Payment Successful!');
+                                console.log('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',response)
+                                // Send response to your server for verification
+                                fetch('/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(response),
+                                    // body: JSON.stringify({
+                                    //     razorpay_order_id
+                                    //     razorpay_payment_id
+                                    //     razorpay_signature
+                                    // }),
+
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log("llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll",response)
+                                    if (data.success) {
+                                        // alert('Payment Verified!');
+                                        placeOrder(addressIds,totalPrice,items,product,selectedOption.value, response.razorpay_order_id)
+                                    } else {
+                                        // alert('Payment Verification Failed!');
+                                        Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Error in placing order",
+                                        
+                                        });
+                                    }
+                                });
+                            },
+                            prefill: {
+                                name: '<%= userData.name %>',
+                                email: '<%= userData.email%>',
+                                contact: '<%= userData.phone%>',
+                            },
+                            theme: {
+                                color: '#3399cc',
+                            },
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                            
+
+                    }
+                }
             }
 
 

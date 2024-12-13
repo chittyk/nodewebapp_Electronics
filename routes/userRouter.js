@@ -35,6 +35,14 @@ const cartController =require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
 const couponController=require("../controllers/user/couponController")
 
+const crypto = require('crypto');
+const Razorpay = require('razorpay');
+
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_D64ckPQSXSWgra',
+    key_secret: 'Swz6kCqpqDLYbodGriBcRFx4',
+});
+
 
 // Routes
 router.get('/pageNotFound', userController.pageNotFound);
@@ -121,6 +129,42 @@ router.post('/editAddressCart1',userAuth,cartController.postEditAddress1)
 router.post('/updateAddress', userAuth, cartController.updateAddress);
 router.get('/changeAddress',userAuth,cartController.changeAddress)
 router.post('/confirmOrder',removeCartSession,userAuth,cartController.postConfirmOrder);
+//razorpay
+
+router.post('/create-order', async (req, res) => {
+    const { amount, currency, receipt } = req.body; // Expect amount in paise
+    try {
+        const order = await razorpay.orders.create({
+            amount: amount, 
+            currency: currency || 'INR', 
+            receipt: receipt || 'receipt_order_1',
+        });
+        res.status(200).json(order);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+
+
+router.post('/verify-payment', (req, res) => {
+    console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",req.body)
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    console.log(razorpay_order_id,razorpay_payment_id,razorpay_signature)
+    const generatedSignature = crypto
+        .createHmac('sha256', 'Swz6kCqpqDLYbodGriBcRFx4')
+        .update(razorpay_order_id + '|' + razorpay_payment_id)
+        .digest('hex');
+
+    if (generatedSignature === razorpay_signature) {
+        res.status(200).json({ success: true });
+    } else {
+        res.status(400).json({ success: false, message: 'Payment verification failed' });
+    }
+});
+
 //create the new router
 
 router.post('/cancelOrder',userAuth,cartController.cancelOrder)

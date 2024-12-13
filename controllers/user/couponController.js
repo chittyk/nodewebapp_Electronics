@@ -5,8 +5,8 @@ const checkCoupon = async (req, res) => {
 
     try {
         const { code } = req.body;
-        const userid = req.session.user._id
-        console.log(req.session)
+        const userid = req.session.user || req.session.user._id 
+        console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",req.session)
 
         console.log('1', code, typeof (code))
         const coupon = await Coupon.findOne({ name: code });
