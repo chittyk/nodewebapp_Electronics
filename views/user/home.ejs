@@ -206,7 +206,7 @@
 			font-family: Arial, Helvetica, sans-serif;
 		}
 	</style>
-
+	<br><br><br><br>
 	<!-- search area -->
 	<div class="search-area">
 		<div class="container">
@@ -232,7 +232,7 @@
 	<section class="hero-slider container-fluid bg-white position-relative pt-10 pb-10">
 		<div style="width: 100%;" class="swiper-container container-fluid  ">
 			<div style="" class=" swiper-wrapper">
-				<% banner.slice(0, 2).forEach(bannerItem=> { %>
+				<% banner.forEach(bannerItem=> { %>
 					<div class="container-fluid swiper-slide">
 						<div class="single-hero-slider single-animation-wrap">
 							<div class="container-fluid">
@@ -274,22 +274,7 @@
 
 
 	<!-- Banner Section -->
-	<section class="banner-area pt-5 pb-5">
-		<div class="container">
-			<div class="row">
-				<% banner.slice(2).forEach(bannerItem=> { %>
-					<div class="col-lg-4 col-md-6">
-						<div class="single-banner">
-							<a href="<%= bannerItem.link %>">
-								<img  src="/uploads/re-image/<%= bannerItem.image %>" alt="<%= bannerItem.title %>"
-									style="width: 100%; height: auto;">
-							</a>
-						</div>
-					</div>
-					<% }) %>
-			</div>
-		</div>
-	</section>
+	
 
 
 	<!-- end hero area -->
@@ -411,7 +396,7 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-6 col-md-12">
-					<div style="background-image: url('/uploads/re-image/<%= banner[0].image %>');margin-top: 100px; height: 400px;"
+					<div style="background-image: url('/uploads/re-image/<%= banner[1].image %>');margin-top: 70px; height: 400px;"
 						class="  ">
 						<a href="https://youtube.com/playlist?list=PL1Au2VpdCY33OV7UFa1efynyDmgc3B2eI&si=ZZtewZS2cA6mFr_A"
 							class="video-play-btn popup-youtube"><i class="fas fa-play"></i></a>

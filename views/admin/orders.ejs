@@ -105,10 +105,19 @@
                 </tbody>
 
             </table>
-            <div class="row justify-content-center">
-
-
-            </div>
+            <div class="row justify-content-center mt-4">
+    <nav>
+        <ul class="pagination">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === page ? 'active' : '' %>">
+                    <a class="page-link" href="/admin/orders?page=<%= i %>">
+                        <%= i %>
+                    </a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
 
             <script>
                 // Function to filter table rows based on search input

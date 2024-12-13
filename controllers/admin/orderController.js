@@ -5,17 +5,19 @@ const Address = require('../../models/addressSchema');
 
 const getOrders = async (req, res) => {
     try {
-        // Get page and limit from query params (default to 1 and 10)
-        // const page = parseInt(req.query.page) || 1; // Pagination page
-        // const limit = parseInt(req.query.limit) || 10; // Items per page
-        // const skip = (page - 1) * limit; // Calculate how many items to skip
+        // Get page and limit from query params (default to 1 and 20)
+        const page = parseInt(req.query.page) || 1; // Pagination page
+        const limit = 20; // Items per page
+        const skip = (page - 1) * limit; // Calculate how many items to skip
 
-        // Fetch the orders with pagination (pagination lines commented)
-        const orders = await Order.find({}); // .skip(skip).limit(limit);
+        // Fetch the orders with pagination
+        const orders = await Order.find({})
+            .skip(skip)
+            .limit(limit);
 
-        // Get total number of orders for calculating total pages (pagination lines commented)
-        // const totalOrders = await Order.countDocuments({}); // Total orders in DB
-        // const totalPages = Math.ceil(totalOrders / limit); // Total pages for pagination
+        // Get total number of orders for calculating total pages
+        const totalOrders = await Order.countDocuments({}); // Total orders in DB
+        const totalPages = Math.ceil(totalOrders / limit); // Total pages for pagination
 
         // Fetch user and product data as before
         const user = await User.find({});
@@ -69,17 +71,18 @@ const getOrders = async (req, res) => {
             return res.redirect('/admin/pageNotFound');
         }
 
-        // Render the orders page and pass the orders data and pagination info (pagination info commented)
+        // Render the orders page and pass the orders data and pagination info
         res.render('orders', {
             result: result,
-            // page: page, // Pagination page (commented out)
-            // totalPages: totalPages // Total pages (commented out)
+            page: page, // Current page
+            totalPages: totalPages // Total pages
         });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 
 
