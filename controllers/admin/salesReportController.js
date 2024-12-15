@@ -7,7 +7,7 @@ const getSalesReport = async (req, res) => {
     try {
         console.log("Fetching sales report...");
 
-        const basedOn = req.query.basedOn || 'all'; // Example parameter for filtering (if needed)
+        const basedOn = req.query.basedOn || 'd'; // Example parameter for filtering (if needed)
         const page = parseInt(req.query.page) || 1; // Current page, default is 1
         const limit = parseInt(req.query.limit) || 10; // Number of items per page, default is 10
         const skip = (page - 1) * limit; // Calculate the number of documents to skip
@@ -19,25 +19,68 @@ const getSalesReport = async (req, res) => {
 
         // Fetch orders with pagination
         let orders = await Orders.find({})
-        const filteredOrders =[]
-        const salesReport =[]
+        let= filteredOrders =[]
+        var salesReport =[]
 
-
+        
+        console.log("")
         //c,w,d,m
         if (basedOn === "c") {
-            // console.log(orders)
-            const startDate = new Date('2024-12-12');
-            const endDate = new Date('2024-12-13');
-
+            // Extract start and end dates from query parameters
+            const startDate = new Date(req.query.startDate); // Convert to Date object
+            const endDate = new Date(req.query.endDate);     // Convert to Date object
+        
+            // Validate that both dates are valid
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                console.error("Invalid date range provided");
+                return res.status(400).send("Invalid date range");
+            }
+        
+            // Filter orders based on the date range
             filteredOrders = orders.filter(order => {
-                const createdDate = new Date(order.createdOn);
-                return createdDate >= startDate && createdDate <= endDate;
-            })
-            .skip(skip)
-            .limit(limit);
-
-            console.log(filteredOrders);
+                if (order.createdOn) {
+                    const createdDate = new Date(order.createdOn); // Convert createdOn to Date
+                    return createdDate >= startDate && createdDate <= endDate; // Compare dates
+                }
+                console.warn("Order missing createdOn field:", order);
+                return false;
+            });
+        
+            // Group orders by date
+            const groupedOrders = filteredOrders.reduce((acc, order) => {
+                const date = new Date(order.createdOn).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+                if (!acc[date]) {
+                    acc[date] = [];
+                }
+                acc[date].push(order);
+                return acc;
+            }, {});
+        
+            
+        
+            Object.entries(groupedOrders).forEach(([key, value]) => {
+                const totalRevenue = value.reduce((sum, val) => val.status === "Delivered" ? sum + val.totalPrice : sum, 0);
+                const totalSales = value.filter(val => val.status === "Delivered").length;
+                const couponCount = value.filter(val => val.couponApplied).length;
+                const totalOrders = value.length;
+                const discountCount = value.filter(val => val.discountApplied).length;
+        
+                const value1 = {
+                    date: key,
+                    totalRevenue,
+                    totalSales,
+                    coupon: couponCount,
+                    totalOrders,
+                    discount: discountCount,
+                };
+        
+                console.log(value1);
+                salesReport.push(value1);
+            });
+        
+            console.log("/////////////////////////////////////////////////////////////////////////////////////////////",salesReport);
         }
+        
         
         
         
@@ -123,6 +166,7 @@ const getSalesReport = async (req, res) => {
 
                 };
                 console.log(value1);
+                salesReport.push(value1)
               });
           
             // Convert the grouped object into a sorted array
@@ -160,7 +204,7 @@ const getSalesReport = async (req, res) => {
     Object.entries(grouped).forEach(([key, value]) => {
         console.log(`Key: ${key}, Value:`);
         let value1 = {
-            weekYear: key, // Week-Year grouping
+            date: key, // Week-Year grouping
             totalRevenue: (() => {
                 let total = 0;
                 value.forEach(val => {
@@ -202,6 +246,7 @@ const getSalesReport = async (req, res) => {
             })()
         };
         console.log(value1);
+        salesReport.push(value1)
     });
 
     // Convert the grouped object into a sorted array if needed
@@ -248,7 +293,7 @@ else if (basedOn === 'm') {
             Object.entries(grouped).forEach(([key, value]) => {
                 console.log(`Key: ${key}, Value:`);
                 let value1 = {
-                    monthYear: key, // Month-Year grouping
+                    date: key, // Month-Year grouping
                     totalRevenue: (() => {
                         let total = 0;
                         value.forEach(val => {
@@ -290,6 +335,8 @@ else if (basedOn === 'm') {
                     })()
                 };
                 console.log(value1);
+                salesReport.push(value1)
+
             });
         
             // Convert the grouped object into a sorted array if needed
@@ -308,14 +355,14 @@ else if (basedOn === 'm') {
 
 
 
-
+             console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",salesReport)
 
         // Calculate total pages
         const totalPages = Math.ceil(totalOrders / limit);
 
         // Render the view with pagination data
         res.render('sales-report', {
-            
+            salesReport:salesReport,
             orders,
             currentPage: page,
             totalPages,
@@ -324,7 +371,7 @@ else if (basedOn === 'm') {
         });
     } catch (error) {
         console.error("Error fetching sales report:", error);
-        res.render('/admin/pageNotFound');
+        res.redirect('/admin/pageNotFound');
     }
 };
 
