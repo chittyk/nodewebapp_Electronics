@@ -14,6 +14,8 @@ const BannerController =require('../controllers/admin/bannerController');
 const Banner = require('../models/BannerSchema');
 const couponController=require('../controllers/admin/couponController')
 const orderController =require("../controllers/admin/orderController");
+const salesReportController=require("../controllers/admin/salesReportController")
+
 
 //pageNotFound
 router.get("/pageNotFound",adminAuth,adminController.pageNotFound)
@@ -85,5 +87,11 @@ router.post('/createCoupon',adminAuth, couponController.createCoupon)
 router.get('/editCoupon',adminAuth,couponController.editCoupon)
 router.post('/postEditCoupon',adminAuth,couponController.postEditCoupon)
 router.post('/deleteCoupon',adminAuth,couponController.deleteCoupon)
+
+
+
+// sales report
+router.get("/salesReport",adminAuth,salesReportController.getSalesReport)
+
 
 module.exports = router;
