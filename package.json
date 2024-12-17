@@ -13,7 +13,8 @@
     "bootstrap-icons": "^1.11.3",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
-    "express": "^4.21.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
     "express-session": "^1.18.1",
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.0",
@@ -22,10 +23,14 @@
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pdfkit": "^0.15.2",
+    "pdfmake": "^0.2.16",
     "playwright": "^1.49.0",
+    "puppeteer": "^23.10.4",
     "razorpay": "^2.9.5",
     "sharp": "^0.33.5",
     "sweetalert2": "^11.6.13",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "xlsx": "^0.18.5"
   }
 }

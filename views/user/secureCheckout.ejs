@@ -419,7 +419,16 @@
                 }else{
                     console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",selectedOption.value)
                     if(selectedOption.value === 'cod'){
+                                                
+                        if(totalPrice>1000){
+                            Swal.fire({
+                                title: "Not Avalilable",
+                                text: "Cash on Delivery only available for under ₹1000 order",
+                                icon: "info"
+                            });
+                        }else{
                         placeOrder(addressIds,totalPrice,items,product,selectedOption.value,'none')
+                        }
                     }else if(selectedOption.value=='razorpay'){
 
                         // alert("hello")
@@ -460,6 +469,7 @@
                                         // alert('Payment Verified!');
                                         placeOrder(addressIds,totalPrice,items,product,selectedOption.value, response.razorpay_order_id)
                                     } else {
+                                        
                                         // alert('Payment Verification Failed!');
                                         Swal.fire({
                                         icon: "error",

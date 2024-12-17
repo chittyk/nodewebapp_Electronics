@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Discount</th>
+                <th>Coupon</th>
+                <th>Final Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% salesData.forEach(data => { %>
+            <tr>
+              <td><%= data.orderId %></td>
+              <td><%= data.date %></td>
+              <td><%= data.totalAmount %></td>
+              <td><%= data.discount %></td>
+              <td><%= data.coupon || 'N/A' %></td>
+              <td><%= data.finalAmount %></td>
+              <td><%= data.status %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+              </table>
+</body>
+</html>

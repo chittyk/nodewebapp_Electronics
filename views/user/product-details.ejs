@@ -87,7 +87,7 @@
                                         <div class="short-desc mb-30">
                                             <p>
                                                 <%= product.description %>
-                                            </p>
+                                            </p>  
                                         </div>
                                         <div class="product_sort_info font-xs mb-30">
                                             <ul>
@@ -95,8 +95,13 @@
                                                 </li>
                                                 <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return
                                                     Policy</li>
-                                                <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available
-                                                </li>
+                                                <% if (product.salePrice>1000) { %>
+                                                    <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery not available
+                                                    </li>
+                                                <% } else { %>
+                                                    <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available
+                                                    </li>
+                                                <% } %>
                                             </ul>
                                         </div>
 

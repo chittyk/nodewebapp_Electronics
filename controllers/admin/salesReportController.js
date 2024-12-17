@@ -21,7 +21,25 @@ const getSalesReport = async (req, res) => {
         let orders = await Orders.find({})
         let= filteredOrders =[]
         var salesReport =[]
-
+        let salesprice1=0
+        let salediscount1=0
+        let salescount1=0
+        orders.forEach(order => {
+            if(order.status ==="Delivered"){
+                salesprice1 = salesprice1 + order.totalPrice
+            }
+        });
+        orders.forEach(order => {
+            if(order.discount>0){
+                salediscount1 = salediscount1 + order.discount
+                
+            }
+        });
+        orders.forEach(order => {
+            if(order.status ==="Delivered"){
+                salescount1 =salediscount1+1
+            }
+        });
         
         console.log("")
         //c,w,d,m
@@ -359,7 +377,7 @@ else if (basedOn === 'm') {
 
         // Calculate total pages
         const totalPages = Math.ceil(totalOrders / limit);
-
+        const paginatedSalesReport = salesReport.slice(skip, skip + limit);
         // Render the view with pagination data
         res.render('sales-report', {
             salesReport:salesReport,
@@ -368,6 +386,9 @@ else if (basedOn === 'm') {
             totalPages,
             totalOrders,
             limit,
+            salesprice1,
+            salediscount1,
+            salescount1
         });
     } catch (error) {
         console.error("Error fetching sales report:", error);

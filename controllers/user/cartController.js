@@ -435,7 +435,7 @@ const postConfirmOrder = async (req, res) => {
             totalPrice: totalPrice,
             finalAmount: totalPrice, // Assuming no discounts, same as totalPrice
             address: selectedAddress ? selectedAddress._id : addresss.address[index]._id, // Handle if selectedAddress is undefined
-            status: 'pending',
+            status: 'Processing',
             createdOn: new Date(),
             paymentMethod: selectedOption,
             couponApplied : couponStatus,

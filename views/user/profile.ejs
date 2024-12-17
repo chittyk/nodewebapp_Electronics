@@ -179,10 +179,24 @@
         <%= order.orderId %>
     </a></span>
       
-      <span class="order-status badge <%= statusClasses[order.status.toLowerCase()] %> position-absolute top-0 end-0 m-2">
+      <span class="order-status bg-warning badge <%= statusClasses[order.status.toLowerCase()] %> position-absolute top-0 end-0 m-2">
         <%= order.status %>
       </span>
-      <span class="delivery-date">| Delivery Date: January 25, 2024</span>
+      
+      <% 
+        let date = new Date(order.createdOn);
+
+        // Add 7 days
+        date.setDate(date.getDate() + 7);
+
+        // Format to dd/mm/yyyy
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        let year = date.getFullYear();
+
+        let formattedDate = ` ${day}/${month}/${year}`;
+      %>
+      <span class="delivery-date">| Delivery Date:<%= formattedDate %> | Payment Method: <span class="text-success"><%= order.paymentMethod %> </span> </span>
     </div>
     <div class="card-body">
       <div class="row">

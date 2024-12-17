@@ -15,7 +15,8 @@ const Banner = require('../models/BannerSchema');
 const couponController=require('../controllers/admin/couponController')
 const orderController =require("../controllers/admin/orderController");
 const salesReportController=require("../controllers/admin/salesReportController")
-
+const pdfController =require('../controllers/admin/pdfController')
+const ExcelJS = require('exceljs');
 
 //pageNotFound
 router.get("/pageNotFound",adminAuth,adminController.pageNotFound)
@@ -93,5 +94,38 @@ router.post('/deleteCoupon',adminAuth,couponController.deleteCoupon)
 // sales report
 router.get("/salesReport",adminAuth,salesReportController.getSalesReport)
 
+router.get('/generate-pdf',adminAuth,pdfController.createPdf)
 
+
+router.get('/admin/generate-Xl', async (req, res) => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sales Report');
+  
+      // Add columns
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 10 },
+        { header: 'Product Name', key: 'productName', width: 30 },
+        { header: 'Quantity', key: 'quantity', width: 15 },
+        { header: 'Price', key: 'price', width: 15 },
+      ];
+  
+      // Add some dummy data
+      worksheet.addRow({ id: 1, productName: 'Product A', quantity: 50, price: 20 });
+      worksheet.addRow({ id: 2, productName: 'Product B', quantity: 30, price: 15 });
+      worksheet.addRow({ id: 3, productName: 'Product C', quantity: 40, price: 25 });
+  
+      // Write the file to memory and send it as a response
+      const buffer = await workbook.xlsx.writeBuffer();
+      
+      // Set headers to download the file as an Excel file
+      res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      
+      // Send the file buffer as the response
+      res.send(buffer);
+    } catch (error) {
+      res.status(500).send('Error generating Excel file');
+    }
+  });
 module.exports = router;
