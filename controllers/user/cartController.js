@@ -1,3 +1,4 @@
+
 const Cart = require("../../models/cartSchema")
 const User = require("../../models/userSchema")
 const Product = require('../../models/productSchema');
@@ -426,21 +427,37 @@ const postConfirmOrder = async (req, res) => {
 
         console.log("Order Items:", ItemArr);
 
+        let order
+        if(razorpay_order_id==="failed"){
+            order = new Order({
+                userId: userId,
+                orderedItems: ItemArr, // Push the ItemArr array here
+                totalPrice: totalPrice,
+                finalAmount: totalPrice, // Assuming no discounts, same as totalPrice
+                address: selectedAddress ? selectedAddress._id : addresss.address[index]._id, // Handle if selectedAddress is undefined
+                status: 'pending',
+                createdOn: new Date(),
+                paymentMethod: selectedOption,
+                couponApplied : couponStatus,
+                RazorpayOrderId:razorpay_order_id
+            });
 
+        }else{
+            order = new Order({
+                userId: userId,
+                orderedItems: ItemArr, // Push the ItemArr array here
+                totalPrice: totalPrice,
+                finalAmount: totalPrice, // Assuming no discounts, same as totalPrice
+                address: selectedAddress ? selectedAddress._id : addresss.address[index]._id, // Handle if selectedAddress is undefined
+                status: 'Processing',
+                createdOn: new Date(),
+                paymentMethod: selectedOption,
+                couponApplied : couponStatus,
+                RazorpayOrderId:razorpay_order_id
+            });
+        }
 
-
-        let order = new Order({
-            userId: userId,
-            orderedItems: ItemArr, // Push the ItemArr array here
-            totalPrice: totalPrice,
-            finalAmount: totalPrice, // Assuming no discounts, same as totalPrice
-            address: selectedAddress ? selectedAddress._id : addresss.address[index]._id, // Handle if selectedAddress is undefined
-            status: 'Processing',
-            createdOn: new Date(),
-            paymentMethod: selectedOption,
-            couponApplied : couponStatus,
-            RazorpayOrderId:razorpay_order_id
-        });
+        
 
         await order.save(); // Save the order to the database
 
@@ -737,7 +754,51 @@ const orderDetails1 = async (req, res) => {
         res.status(500).render('error', { message: 'Failed to fetch order details' });
     }
 };
+const updateData = async (req, res) => {
+    try {
+        const { razorpay_order_id, orderId } = req.body;
 
+        if (!razorpay_order_id || !orderId) {
+            console.error("Missing Razorpay order ID or order ID in the request.");
+            return res.status(400).json({
+                success: false,
+                message: "Order ID or Razorpay order ID missing"
+            });
+        }
+
+        const orderData = {
+            status: 'Processing',  // Update the order status
+            RazorpayOrderId: razorpay_order_id || null,  // Update Razorpay order ID
+        };
+
+        // Remove upsert: true to avoid creating a new document
+        const updatedOrder = await Order.findOneAndUpdate(
+            { orderId: orderId },  // Find the order by orderId
+            { $set: orderData },    // Update the status and RazorpayOrderId
+            { new: true }           // Ensure that the updated document is returned
+        );
+
+        if (!updatedOrder) {
+            console.error(`Order with ID ${orderId} not found.`);
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Order updated successfully',
+            order: updatedOrder,
+        });
+    } catch (error) {
+        console.error('Error in updateData:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error. Please try again later.',
+        });
+    }
+};
 
 module.exports = {
     postCart,
@@ -756,6 +817,7 @@ module.exports = {
     addAddress,
     postAddAddress,
     orderDetails,
-    orderDetails1    
+    orderDetails1,
+    updateData
 
 }

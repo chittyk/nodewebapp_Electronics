@@ -229,7 +229,7 @@
             <% } else { %>
               <button class="btn btn-primary">Track Order</button>
               <% if (order.status === 'pending') { %>
-                <button class="btn btn-secondary" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                <button class="btn btn-secondary" onclick="confirmOrder('<%= order.orderId %>','<%= order.totalPrice %>')">Cancel Order</button>
               <% } else if (order.status === 'Processing') { %>
                 <button class="btn btn-secondary">Reorder</button>
               <% } %>
@@ -289,6 +289,192 @@
                       </div>
     </section>
   </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+  function placeOrder(orderId,razorpay_order_id){
+                $.ajax({
+                            url: '/updateData',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                orderId:orderId,
+                                razorpay_order_id:razorpay_order_id
+
+                            }),
+                            success: (response) => {
+                                console.log('Server response:', response);
+
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "Order Has Been Placed Successfully",
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                    }).then(() => {
+                                        // Redirect to home page after success message
+                                        window.location.href = `/shop`;
+                                    });
+                                    
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: response.message || "Error in placing order.",
+                                    });
+                                }
+                            },
+                            error: (error) => {
+                                console.error('AJAX error:', error.responseText || error.statusText);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: "Something went wrong!",
+                                });
+                            },
+                        });
+            }
+
+
+
+
+async function confirmOrder(orderId, totalPrice) {
+    console.log('Order confirmation initiated...', orderId);
+    
+    const response = await fetch('/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalPrice * 100 }), // Amount in paise (₹1 = 100 paise)
+    });
+
+    const order = await response.json();
+
+    const options = {
+        key: 'rzp_test_D64ckPQSXSWgra', // Replace with your Razorpay API Key
+        amount: order.amount,
+        currency: order.currency,
+        name: 'DiyElectro',
+        description: 'Payment session',
+        order_id: order.id, // Razorpay Order ID
+        handler: function (response) {
+            console.log('Payment success:', response);
+
+            // Send successful response to server for verification
+            fetch('/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(response),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    placeOrder(orderId, response.razorpay_order_id);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Payment verification failed!",
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error verifying payment:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Something went wrong in verification!",
+                });
+            });
+        },
+        prefill: {
+            name: '<%= userData.name %>',
+            email: '<%= userData.email %>',
+            contact: '<%= userData.phone %>',
+        },
+        theme: {
+            color: '#3399cc',
+        },
+    };
+
+    const rzp = new Razorpay(options);
+
+    // Handling payment failure
+    rzp.on('payment.failed', function (response) {
+        console.error("Payment Failed:", response);
+
+        Swal.fire({
+            icon: "error",
+            title: "Payment Failed",
+            text: `Reason: ${response.error.description || "Unknown error"} \nError Code: ${response.error.code}`,
+        });
+
+        // Log the failure to the server for record-keeping
+        fetch('/log-payment-failure', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                error_code: response.error.code,
+                error_description: response.error.description,
+                order_id: response.error.metadata.order_id,
+                payment_id: response.error.metadata.payment_id,
+            }),
+        }).then(() => {
+            console.log("Payment failure logged successfully on server.");
+            
+        }).catch(err => {
+            console.error("Error logging payment failure:", err);
+        });
+    });
+
+    rzp.open();
+}
+
+
+                
+  
+  
+  
+  
+</script>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   <script>
     function cancellReturnOrder(orderId) {

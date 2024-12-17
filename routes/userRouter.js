@@ -129,6 +129,7 @@ router.post('/editAddressCart1',userAuth,cartController.postEditAddress1)
 router.post('/updateAddress', userAuth, cartController.updateAddress);
 router.get('/changeAddress',userAuth,cartController.changeAddress)
 router.post('/confirmOrder',removeCartSession,userAuth,cartController.postConfirmOrder);
+router.post('/updateData',userAuth,cartController.updateData)
 //razorpay
 
 router.post('/create-order', async (req, res) => {
@@ -148,22 +149,67 @@ router.post('/create-order', async (req, res) => {
 
 
 
-
 router.post('/verify-payment', (req, res) => {
-    console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",req.body)
+    console.log("Payment verification initiated:", req.body);
+
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    console.log(razorpay_order_id,razorpay_payment_id,razorpay_signature)
+
+    // If any field is missing, log and return immediately
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        console.error("Missing parameters in payment verification request.");
+        res.status(400).json({ success: false, message: "Invalid payment data" });
+        return;
+    }
+
     const generatedSignature = crypto
-        .createHmac('sha256', 'Swz6kCqpqDLYbodGriBcRFx4')
+        .createHmac('sha256', 'Swz6kCqpqDLYbodGriBcRFx4') // Replace with your actual key secret
         .update(razorpay_order_id + '|' + razorpay_payment_id)
         .digest('hex');
 
     if (generatedSignature === razorpay_signature) {
+        console.log("Payment verification successful:", razorpay_payment_id);
         res.status(200).json({ success: true });
     } else {
-        res.status(400).json({ success: false, message: 'Payment verification failed' });
+        console.error("Payment verification failed:");
+        console.error(`Order ID: ${razorpay_order_id}`);
+        console.error(`Payment ID: ${razorpay_payment_id}`);
+        console.error(`Expected Signature: ${generatedSignature}`);
+        console.error(`Received Signature: ${razorpay_signature}`);
+        
+        res.status(400).json({ 
+            success: false, 
+            message: 'Payment verification failed'
+        });
     }
 });
+
+
+
+
+router.post('/log-payment-failure', (req, res) => {
+    const { error_code, error_description, order_id, payment_id } = req.body;
+
+    console.error("Payment Failure Log:");
+    console.error(`Error Code: ${error_code}`);
+    console.error(`Description: ${error_description}`);
+    console.error(`Order ID: ${order_id}`);
+    console.error(`Payment ID: ${payment_id}`);
+
+    // Log into a file, database, or monitoring system
+    // Example: Log to a file
+    const fs = require('fs');
+    const logMessage = `Payment Failed: Code: ${error_code}, Description: ${error_description}, Order ID: ${order_id}, Payment ID: ${payment_id}\n`;
+    fs.appendFile('payment_failure.log', logMessage, (err) => {
+        if (err) {
+            console.error('Failed to write to log file:', err);
+            return res.status(500).json({ success: false, message: "Failed to log error." });
+        }
+        res.status(200).json({ success: true, message: "Error logged successfully." });
+    });
+});
+
+
+
 
 //create the new router
 

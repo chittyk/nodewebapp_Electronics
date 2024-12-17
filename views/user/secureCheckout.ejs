@@ -429,72 +429,95 @@
                         }else{
                         placeOrder(addressIds,totalPrice,items,product,selectedOption.value,'none')
                         }
-                    }else if(selectedOption.value=='razorpay'){
+                    }else if (selectedOption.value === 'razorpay') {
+    const response = await fetch('/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalPrice * 100 }), // Amount in paise (₹1 = 100 paise)
+    });
 
-                        // alert("hello")
-                        const response = await fetch('/create-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ amount:  totalPrice*100 }), // Amount in paise (10000 = ₹100)
-                        });
+    const order = await response.json();
 
-                        const order = await response.json();
+    const options = {
+        key: 'rzp_test_D64ckPQSXSWgra', // Replace with your Razorpay API Key
+        amount: order.amount,
+        currency: order.currency,
+        name: 'DiyElectro',
+        description: 'Payment session',
+        order_id: order.id, // Razorpay Order ID
+        handler: function (response) {
+            console.log('Payment success:', response);
 
-                        const options = {
-                            key: 'rzp_test_D64ckPQSXSWgra', // Replace with your API key_id
-                            amount: order.amount,
-                            currency: order.currency,
-                            name: 'DiyElectro',
-                            description: 'Payment session',
-                            order_id: order.id,
-                            handler: function (response) {
-                                // alert('Payment Successful!');
-                                console.log('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',response)
-                                // Send response to your server for verification
-                                fetch('/verify-payment', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(response),
-                                    // body: JSON.stringify({
-                                    //     razorpay_order_id
-                                    //     razorpay_payment_id
-                                    //     razorpay_signature
-                                    // }),
+            // Send successful response to server for verification
+            fetch('/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(response),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    placeOrder(addressIds, totalPrice, items, product, selectedOption.value, response.razorpay_order_id);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Payment verification failed!",
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error verifying payment:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Something went wrong in verification!",
+                });
+            });
+        },
+        prefill: {
+            name: '<%= userData.name %>',
+            email: '<%= userData.email %>',
+            contact: '<%= userData.phone %>',
+        },
+        theme: {
+            color: '#3399cc',
+        },
+    };
 
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    console.log("llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll",response)
-                                    if (data.success) {
-                                        // alert('Payment Verified!');
-                                        placeOrder(addressIds,totalPrice,items,product,selectedOption.value, response.razorpay_order_id)
-                                    } else {
-                                        
-                                        // alert('Payment Verification Failed!');
-                                        Swal.fire({
-                                        icon: "error",
-                                        title: "Oops...",
-                                        text: "Error in placing order",
-                                        
-                                        });
-                                    }
-                                });
-                            },
-                            prefill: {
-                                name: '<%= userData.name %>',
-                                email: '<%= userData.email%>',
-                                contact: '<%= userData.phone%>',
-                            },
-                            theme: {
-                                color: '#3399cc',
-                            },
-                        };
+    const rzp = new Razorpay(options);
 
-                        const rzp = new Razorpay(options);
-                        rzp.open();
-                            
+    // Handling payment failure
+    rzp.on('payment.failed', function (response) {
+        console.error("Payment Failed:", response);
 
-                    }
+        Swal.fire({
+            icon: "error",
+            title: "Payment Failed",
+            text: `Reason: ${response.error.description || "Unknown error"} \nError Code: ${response.error.code}`,
+        });
+
+        // Log the failure to the server for record-keeping
+        fetch('/log-payment-failure', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                error_code: response.error.code,
+                error_description: response.error.description,
+                order_id: response.error.metadata.order_id,
+                payment_id: response.error.metadata.payment_id,
+            }),
+        }).then(() => {
+            console.log("Payment failure logged successfully on server.");
+            placeOrder(addressIds, totalPrice, items, product, selectedOption.value, "failed");
+        }).catch(err => {
+            console.error("Error logging payment failure:", err);
+        });
+    });
+
+    rzp.open();
+}
+
                 }
             }
 
