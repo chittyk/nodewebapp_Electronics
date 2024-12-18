@@ -1,322 +1,328 @@
-<%- include("../../views/partials/admin/header") %>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb5QH1ZqG1BTAk6Ey0jTkC4QiGDU48OxT7T29"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    </head>
-
-    <body>
-        <div class="row">
-            <div class="col-12">
-                <h2 class="text-center">Order Management</h2><br>
-            </div>
-        </div><br>
-
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-10">
-                <input type="text" id="searchInput" class="form-control"
-                    placeholder="Search by Order ID, Customer Name, or Status..." onkeyup="searchOrders()">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced E-commerce Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Additional Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Axios for AJAX requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">E-commerce Admin Dashboard</h1>
+            <div class="flex space-x-4">
+                <select id="globalTimePeriod" class="form-select px-4 py-2 border rounded">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly" selected>Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
             </div>
         </div>
 
-        <div class="container mt-5">
-            <!-- Table for Orders -->
-            <table class="table ms-5 table-bordered table-striped" id="ordersTable">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Order ID</th>
-                        <th>User ID</th>
-                        <th>Customer Name</th>
-                        <th>Ordered Items</th>
-                        <th>Total Price</th>
-                        <th>Status</th>
-                        <th>Payment Method</th>
-                        <th>Coupon Applied</th>
-                        <th>Date Ordered</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (result.length> 0) { %>
-                        <% for (let i=0; i < result.length; i++) { %>
-                            <tr>
-                                <td>
-                                    <%= result[i].orderId %>
-                                </td>
-                                <td>
-                                    <%= result[i].userId %>
-                                </td>
-                                <td>
-                                    <%= result[i].userName %>
-                                </td>
-                                <td>
-                                    <% result[i].orderedItems.forEach(items=> { %>
-                                        <ul>
-                                            <li>
-                                                <%= items.itemName %> <span class="text-success">(<%= items.itemQuantity
-                                                            %> units)</span> - ₹<%= items.itemPrice %>/- each
-                                            </li>
-                                        </ul>
-                                        <% }) %>
-                                </td>
-                                <td>₹<%= result[i].totalPrice %>
-                                </td>
-                                <td id="status-<%= result[i].orderId %>">
-                                    <span>
-                                        <%= result[i].status %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <%= result[i].paymentMethod %>
-                                </td>
-                                <td>
-                                    <%= result[i].couponApplied %>
-                                </td>
-                                <td>
-                                    <%= new Date(result[i].createdOn).toLocaleDateString('en-US') %>
-                                        <%= new Date(result[i].createdOn).toLocaleTimeString('en-US') %>
-                                </td>
-                                <td>
-                                    <% if (result[i].status=='Cancelled' || result[i].status=='Returned' ) { %>
-                                        <button type="button" onclick="removeFromHistory('<%= result[i].orderId %>')"
-                                            class="btn btn-danger mt-2 btn-sm">Remove </button>
-                                        <% } else if (result[i].status=='Return Request' ) { %>
-                                            <button type="button"
-                                                onclick="changeStatus('Returned', '<%= result[i].orderId %>')"
-                                                class="btn bg-success mt-2 btn-sm">Return It</button>
-                                            <button type="button"
-                                                onclick="changeStatus('Delivered', '<%= result[i].orderId %>')"
-                                                class="btn bg-warning mt-2 btn-sm">Don't Return</button>
-                                            <% } else { %>
-                                                <button type="button"
-                                                    onclick="changeStatus('pending', '<%= result[i].orderId %>')"
-                                                    class="btn btn-warning mt-2 btn-sm">Pending</button>
-                                                <button type="button"
-                                                    onclick="changeStatus('Processing', '<%= result[i].orderId %>')"
-                                                    class="btn bg-secondary mt-2 btn-sm">Processing</button>
-                                                <button type="button"
-                                                    onclick="changeStatus('Shipped', '<%= result[i].orderId %>')"
-                                                    class="btn bg-success mt-2 btn-sm">Shipped</button>
-                                                <button type="button"
-                                                    onclick="changeStatus('Delivered', '<%= result[i].orderId %>')"
-                                                    class="btn bg-info mt-2 btn-sm">Delivered</button>
-                                                <button type="button"
-                                                    onclick="changeStatus('Cancelled', '<%= result[i].orderId %>')"
-                                                    class="btn btn-danger mt-2 btn-sm">Cancel</button>
-                                                <% } %>
-                                </td>
-                            </tr>
-                            <% } %>
-                                <% } %>
-                </tbody>
-            </table>
+        <!-- Key Performance Indicators -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <i data-feather="dollar-sign" class="text-green-500 w-12 h-12"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500">Total Revenue</p>
+                    <p id="totalRevenue" class="text-2xl font-bold">$0</p>
+                    <p id="revenueGrowth" class="text-sm text-green-600">+0%</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <i data-feather="shopping-cart" class="text-blue-500 w-12 h-12"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500">Total Orders</p>
+                    <p id="totalOrders" class="text-2xl font-bold">0</p>
+                    <p id="ordersGrowth" class="text-sm text-green-600">+0%</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <i data-feather="users" class="text-purple-500 w-12 h-12"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500">New Customers</p>
+                    <p id="newCustomers" class="text-2xl font-bold">0</p>
+                    <p id="customerGrowth" class="text-sm text-green-600">+0%</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <i data-feather="trending-up" class="text-orange-500 w-12 h-12"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500">Conversion Rate</p>
+                    <p id="conversionRate" class="text-2xl font-bold">0%</p>
+                    <p id="conversionGrowth" class="text-sm text-green-600">+0%</p>
+                </div>
+            </div>
         </div>
 
-        <script>
-            function removeFromHistory(orderId) {
-                console.log('orderId', orderId);
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "You want to remove this!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Yes, Remove it!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
+        <!-- Sales and Revenue Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Sales Trends</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Revenue Trends</h2>
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
 
+        <!-- Top Performing Sections -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Top 10 Products -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Top 10 Best Selling Products</h2>
+                <canvas id="topProductsChart"></canvas>
+            </div>
 
-                        $.ajax({
-                            url: '/admin/removeFromHistory',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({ orderId: orderId }),
-                            success: function (response) {
-                                // Check if the status update was successful
-                                if (response.success) {
-                                    Swal.fire({
-                                        position: 'top-end',
-                                        icon: 'success',
-                                        title: 'Order Removed Successfully',
-                                        showConfirmButton: false,
-                                        timer: 1500
-                                    });
+            <!-- Top 10 Categories -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Top 10 Categories</h2>
+                <canvas id="topCategoriesChart"></canvas>
+            </div>
 
-                                    // Optionally reload the page or dynamically remove the row
-                                    location.reload(); // For full page reload
+            <!-- Top 10 Brands -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Top 10 Brands</h2>
+                <canvas id="topBrandsChart"></canvas>
+            </div>
+        </div>
 
-                                    // If you want to update the table dynamically, use the following (comment this if reloading the page):
-                                    // $('#orderRow' + orderId).remove(); // Assuming the row has an id like "orderRow12345"
-                                } else {
-                                    Swal.fire({
-                                        position: 'top-end',
-                                        icon: 'warning',
-                                        title: 'Failed to remove order',
-                                        showConfirmButton: false,
-                                        timer: 1500
-                                    });
-                                }
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('Error details:', { xhr, status, error });
-                                Swal.fire({
-                                    position: 'top-end',
-                                    icon: 'error',
-                                    title: 'An error occurred. Please try again.',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            }
-                        });
-                    }
-                });
-
-
-
-            }
-        </script>
-
-
-        <script>
-            // Function to handle changing status
-            function changeStatus(sta, orderId) {
-                console.log("Changing status for order:", orderId, "to:", sta);
-
-                $.ajax({
-                    url: '/admin/changeStatus', // Make sure this route exists on your backend
-                    method: 'POST',             // POST method
-                    contentType: 'application/json',
-                    data: JSON.stringify({ sta, orderId }), // Sending JSON data
-                    success: function (response) {
-                        // Check if the status update was successful
-                        if (response.success) {
-                            Swal.fire({
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Order status updated to ' + sta,
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-
-                            // Update the status in the table dynamically
-                            location.reload()
-                        } else {
-                            Swal.fire({
-                                position: 'top-end',
-                                icon: 'warning',
-                                title: 'Failed to update order status',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error details:', { xhr, status, error });
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'error',
-                            title: 'An error occurred. Please try again.',
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    }
-                });
-            }
-
-            // Function to search orders in the table
-            function searchOrders() {
-                const input = document.getElementById('searchInput').value.toLowerCase();
-                const table = document.getElementById('ordersTable');
-                const rows = table.getElementsByTagName('tr');
-
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    const orderId = row.cells[0].textContent.toLowerCase();
-                    const customerName = row.cells[2].textContent.toLowerCase();
-                    const status = row.cells[5].textContent.toLowerCase();
-
-                    if (
-                        orderId.includes(input) ||
-                        customerName.includes(input) ||
-                        status.includes(input)
-                    ) {
-                        row.style.display = '';  // Show the row
-                    } else {
-                        row.style.display = 'none';  // Hide the row
-                    }
-                }
-            }
-        </script>
-
-        <%- include("../../views/partials/admin/footer") %>
-
-
-<!-- ajsklf;ljfl;sajfl;sjfl;sjlfjsl;fjl;asfjlk;asfj -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <div class="col-md-6">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <% if (currentPage > 1) { %>
-                        <li class="page-item">
-                            <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %>">Previous</a>
-                        </li>
-                    <% } %>
-
-                    <% for (let i = 1; i <= totalPages; i++) { %>
-                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                            <a class="page-link" href="/admin/orders?page=<%= i %>"><%= i %></a>
-                        </li>
-                    <% } %>
-
-                    <% if (currentPage < totalPages) { %>
-                        <li class="page-item">
-                            <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %>">Next</a>
-                        </li>
-                    <% } %>
-                </ul>
-            </nav>
+        <!-- Optional: Ledger Book Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Ledger Book</h2>
+                <div class="flex space-x-2">
+                    <button id="generateLedgerBtn" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        Generate Ledger
+                    </button>
+                    <button id="downloadLedgerBtn" class="px-4 py-2 bg-green-500 text-white rounded">
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+            <div id="ledgerContent" class="overflow-x-auto">
+                <!-- Ledger content will be dynamically populated -->
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chart Configuration and Data Fetching
+            const globalTimePeriod = document.getElementById('globalTimePeriod');
+            let salesChart, revenueChart, topProductsChart, topCategoriesChart, topBrandsChart;
+
+            // Utility function for creating charts
+            function createBarChart(ctx, labels, data, title, colors) {
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: title,
+                            data: data,
+                            backgroundColor: colors || 'rgba(54, 162, 235, 0.6)',
+                            borderColor: colors ? colors.map(c => c.replace('0.6', '1')) : 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    plugins: [ChartDataLabels],
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            datalabels: {
+                                color: 'black',
+                                display: true,
+                                anchor: 'end',
+                                align: 'end',
+                                formatter: function(value) {
+                                    return value;
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Fetch and Render Dashboard Data
+            async function fetchDashboardData(period) {
+                try {
+                    // Simulate data fetch - replace with actual API call
+                    const response = await axios.get(`/api/dashboard?period=${period}`);
+                    const data = response.data;
+
+                    // Update KPIs
+                    document.getElementById('totalRevenue').textContent = data.totalRevenue;
+                    document.getElementById('revenueGrowth').textContent = data.revenueGrowth;
+                    document.getElementById('totalOrders').textContent = data.totalOrders;
+                    document.getElementById('ordersGrowth').textContent = data.ordersGrowth;
+                    document.getElementById('newCustomers').textContent = data.newCustomers;
+                    document.getElementById('customerGrowth').textContent = data.customerGrowth;
+                    document.getElementById('conversionRate').textContent = data.conversionRate;
+                    document.getElementById('conversionGrowth').textContent = data.conversionGrowth;
+
+                    // Update Sales Chart
+                    salesChart.data.labels = data.salesTrends.labels;
+                    salesChart.data.datasets[0].data = data.salesTrends.data;
+                    salesChart.update();
+
+                    // Update Revenue Chart
+                    revenueChart.data.labels = data.revenueTrends.labels;
+                    revenueChart.data.datasets[0].data = data.revenueTrends.data;
+                    revenueChart.update();
+
+                    // Update Top Products Chart
+                    topProductsChart.data.labels = data.topProducts.labels;
+                    topProductsChart.data.datasets[0].data = data.topProducts.data;
+                    topProductsChart.update();
+
+                    // Update Top Categories Chart
+                    topCategoriesChart.data.labels = data.topCategories.labels;
+                    topCategoriesChart.data.datasets[0].data = data.topCategories.data;
+                    topCategoriesChart.update();
+
+                    // Update Top Brands Chart
+                    topBrandsChart.data.labels = data.topBrands.labels;
+                    topBrandsChart.data.datasets[0].data = data.topBrands.data;
+                    topBrandsChart.update();
+
+                } catch (error) {
+                    console.error('Error fetching dashboard data:', error);
+                }
+            }
+
+            // Initialize Charts
+            function initializeCharts() {
+                // Sales Trends Chart
+                salesChart = createBarChart(
+                    document.getElementById('salesChart').getContext('2d'),
+                    [],
+                    [],
+                    'Sales Trends'
+                );
+
+                // Revenue Trends Chart
+                revenueChart = createBarChart(
+                    document.getElementById('revenueChart').getContext('2d'),
+                    [],
+                    [],
+                    'Revenue Trends'
+                );
+
+                // Top Products Chart
+                topProductsChart = createBarChart(
+                    document.getElementById('topProductsChart').getContext('2d'),
+                    [],
+                    [],
+                    'Top Products',
+                    [
+                        'rgba(255, 99, 132, 0.6)', 
+                        'rgba(54, 162, 235, 0.6)', 
+                        'rgba(255, 206, 86, 0.6)', 
+                        'rgba(75, 192, 192, 0.6)', 
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                );
+
+                // Top Categories Chart
+                topCategoriesChart = createBarChart(
+                    document.getElementById('topCategoriesChart').getContext('2d'),
+                    [],
+                    [],
+                    'Top Categories',
+                    [
+                        'rgba(255, 159, 64, 0.6)', 
+                        'rgba(54, 162, 235, 0.6)', 
+                        'rgba(255, 206, 86, 0.6)', 
+                        'rgba(75, 192, 192, 0.6)', 
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                );
+
+                // Top Brands Chart
+                topBrandsChart = createBarChart(
+                    document.getElementById('topBrandsChart').getContext('2d'),
+                    [],
+                    [],
+                    'Top Brands',
+                    [
+                        'rgba(199, 199, 199, 0.6)', 
+                        'rgba(54, 162, 235, 0.6)', 
+                        'rgba(255, 206, 86, 0.6)', 
+                        'rgba(75, 192, 192, 0.6)', 
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                );
+            }
+
+            // Ledger Generation
+            document.getElementById('generateLedgerBtn').addEventListener('click', async () => {
+                try {
+                    const response = await axios.get('/api/generate-ledger');
+                    const ledgerContent = document.getElementById('ledgerContent');
+                    ledgerContent.innerHTML = response.data;
+                } catch (error) {
+                    console.error('Error generating ledger:', error);
+                }
+            });
+
+            // Download Ledger
+            document.getElementById('downloadLedgerBtn').addEventListener('click', async () => {
+                try {
+                    const response = await axios.get('/api/download-ledger', {
+                        responseType: 'blob'
+                    });
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'ledger.pdf');
+                    document.body.appendChild(link);
+                    link.click();
+                } catch (error) {
+                    console.error('Error downloading ledger:', error);
+                }
+            });
+
+            // Time Period Change Event
+            globalTimePeriod.addEventListener('change', () => {
+                fetchDashboardData(globalTimePeriod.value);
+            });
+
+            // Initialize everything
+            initializeCharts();
+            fetchDashboardData('monthly'); // Default to monthly view
+            feather.replace(); // Replace icons
+        });
+    </script>
+</body>
+</html>
