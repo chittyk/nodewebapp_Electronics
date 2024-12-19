@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const category = require('../../models/catagorySchema');
 const Order = require('../../models/orderSchema');
+const Brand = require('../../models/brandSchema');
 
 const pageNotFound =async(req, res)=>{
     res.render('pageNotFound')
@@ -105,56 +106,228 @@ const dashboard = async (req, res) => {
             }
         }
 
+
+
+        const topSellingCategories = await Order.aggregate([
+            // Unwind the orderedItems array to get each product separately
+            { $unwind: "$orderedItems" },
+        
+            // Lookup to get the product details from the "products" collection
+            {
+                $lookup: {
+                    from: "products", // The name of the product collection
+                    localField: "orderedItems.product",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+        
+            // Unwind the productDetails array to access the product data
+            { $unwind: "$productDetails" },
+        
+            // Group by category ID and calculate total quantity sold for each category
+            {
+                $group: {
+                    _id: "$productDetails.category", // Group by category ID
+                    totalQuantitySold: { $sum: "$orderedItems.quantity" } // Sum up the quantity
+                }
+            },
+        
+            // Sort by totalQuantitySold in descending order (top-selling categories first)
+            { $sort: { totalQuantitySold: -1 } },
+        
+            // Limit to the top 10 categories
+            { $limit: 10 },
+        
+            // Lookup to get the category details from the "categories" collection
+            {
+                $lookup: {
+                    from: "categories", // The name of the category collection
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryDetails"
+                }
+            },
+        
+            // Unwind the categoryDetails array to access the category data
+            { $unwind: "$categoryDetails" },
+        
+            // Project the fields you want in the final output
+            {
+                $project: {
+                    categoryId: "$_id",
+                    categoryName: "$categoryDetails.name",
+                    totalQuantitySold: 1
+                }
+            }
+        ]);
+        
+        let topCategoryName =[]
+        let topCategorySales=[]
+        topSellingCategories .forEach(category => {
+           topCategoryName.push(category.categoryName) 
+           topCategorySales.push(category.totalQuantitySold)
+        });
+
+
+
+
         const topSellingProducts = await Order.aggregate([
             // Unwind the orderedItems array to get each product separately
             { $unwind: "$orderedItems" },
-
+        
             // Group by product ID and calculate total quantity sold for each product
-            { 
+            {
                 $group: {
                     _id: "$orderedItems.product", // Group by product ID
                     totalQuantitySold: { $sum: "$orderedItems.quantity" }, // Sum up the quantity
                 }
             },
-
+        
             // Sort by totalQuantitySold in descending order (top-selling products first)
             { $sort: { totalQuantitySold: -1 } },
-
+        
             // Limit to the top 10 products
             { $limit: 10 },
-
-            // Optionally, if you want to populate the product details, you can add the following:
+        
+            // Lookup to get the product details from the "products" collection
             {
                 $lookup: {
-                    from: "products", // The name of the collection for the products
-                    localField: "_id", // Match the product ID
-                    foreignField: "_id", // The field to match in the products collection
-                    as: "productDetails" // The alias for the result
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "productDetails"
                 }
             },
-
-            // Optionally, unwind the productDetails to get details for each product
+        
+            // Unwind the productDetails array to access the product data
             { $unwind: "$productDetails" },
-
-            // Project the fields you want (product details, quantity sold, etc.)
+        
+            // Lookup to get the category name from the "categories" collection
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "productDetails.category",
+                    foreignField: "_id",
+                    as: "categoryDetails"
+                }
+            },
+        
+            // Unwind the categoryDetails array to access the category data
+            { $unwind: "$categoryDetails" },
+        
+            // Add category and brand to an array, ensuring no duplicates
+            {
+                $addFields: {
+                    categoryArray: { $ifNull: ["$categoryArray", []] }, // Initialize categoryArray if not exists
+                    brandArray: { $ifNull: ["$brandArray", []] }
+                }
+            },
+            {
+                $addFields: {
+                    categoryArray: {
+                        $cond: {
+                            if: { $in: ["$categoryDetails.name", "$categoryArray"] },
+                            then: "$categoryArray",
+                            else: { $concatArrays: ["$categoryArray", ["$categoryDetails.name"]] }
+                        }
+                    },
+                    brandArray: {
+                        $cond: {
+                            if: { $in: ["$productDetails.brand", "$brandArray"] },
+                            then: "$brandArray",
+                            else: { $concatArrays: ["$brandArray", ["$productDetails.brand"]] }
+                        }
+                    }
+                }
+            },
+        
+            // Project the fields you want in the final output
             {
                 $project: {
                     productId: "$_id",
-                    productName: "$productDetails.name", // assuming 'name' is the product name field
+                    productName: "$productDetails.productName",
                     totalQuantitySold: 1,
-                    productPrice: "$productDetails.price" // assuming 'price' is the product price field
+                    productPrice: "$productDetails.regularPrice",
+                    categories: "$categoryArray", // All unique categories
+                    brands: "$brandArray" // All unique brands
                 }
             }
         ]);
-        console.log('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',topSellingProducts)
+        
+        let productNames =[]
+        let productQty=[]
+        topSellingProducts.forEach(product => {
+            productNames.push(product.productName)
+            productQty.push(product.totalQuantitySold)
+            
+        });
+
+
+
+        const topSellingBrands = await Order.aggregate([
+            // Unwind the orderedItems array to get each product separately
+            { $unwind: "$orderedItems" },
+        
+            // Lookup to get the product details from the "products" collection
+            {
+                $lookup: {
+                    from: "products", // The name of the product collection
+                    localField: "orderedItems.product",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+        
+            // Unwind the productDetails array to access the product data
+            { $unwind: "$productDetails" },
+        
+            // Group by brand and calculate total quantity sold for each brand
+            {
+                $group: {
+                    _id: "$productDetails.brand", // Group by brand
+                    totalQuantitySold: { $sum: "$orderedItems.quantity" } // Sum up the quantity
+                }
+            },
+        
+            // Sort by totalQuantitySold in descending order (top-selling brands first)
+            { $sort: { totalQuantitySold: -1 } },
+        
+            // Limit to the top 10 brands
+            { $limit: 10 },
+        
+            // Project the fields you want in the final output
+            {
+                $project: {
+                    brandName: "$_id",
+                    totalQuantitySold: 1
+                }
+            }
+        ]);
+        
+
+        topBrandNames=[]
+        topBrandQty=[]
+        topSellingBrands.forEach(brand => {
+            topBrandNames.push(brand.brandName)
+            topBrandQty.push(brand.totalQuantitySold)
+        });
+
+
+
+
+
+        console.log('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',topSellingBrands )
         // Log results for debugging
         console.log('Sales Data:', salesData);
         console.log('Sales Count:', salesCount);
         console.log('Total Revenue Array:', totalRevenueArray);
-        console.log('Total Sales Array:', totalSalesArray);
+        console.log('Total Sales Array:', productQty);
 
         // Render the dashboard view
         return res.render('dashboard', {
+            productQty:JSON.stringify(productQty),
+        
             adminData: req.session.admin,
             totalRevenue: Math.round(totalRevenue),
             totalOrders,
@@ -164,6 +337,12 @@ const dashboard = async (req, res) => {
             salesCount: JSON.stringify(salesCount),
             totalRevenueArray: JSON.stringify(totalRevenueArray),
             totalSalesArray: JSON.stringify(totalSalesArray), // Pass the totalSalesArray to view
+            topSellingProducts: JSON.stringify(topSellingProducts), // Pass the topSellingProducts
+            productNames:JSON.stringify(productNames),
+            topCategoryName: JSON.stringify(topCategoryName), // Pass the topSellingCategories
+            topCategorySales: JSON.stringify(topCategorySales),
+            topBrandNames: JSON.stringify(topBrandNames),
+            topBrandQty: JSON.stringify(topBrandQty),
         });
     } catch (error) {
         console.error('Error in redirecting to dashboard:', error.message, error.stack);

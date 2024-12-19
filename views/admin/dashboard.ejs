@@ -1,24 +1,37 @@
-<%- include("../../views/partials/admin/header") %>
-
-<title>Admin Dashboard</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/feather-icons"></script>
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include("../../views/partials/admin/header") %>
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .gradient-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            transition: transform 0.2s;
+        }
+        .gradient-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container {
+            transition: all 0.3s ease;
+        }
+        .chart-container:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800" style="margin-left: 240px; width: calc(100% - 240px);">
-
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800" style="margin-left: 240px; width: calc(100% - 240px);">
     <!-- Dashboard Header -->
-    <header class="flex justify-between items-center p-6 bg-white shadow-md mb-6">
-        <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
+    <header class="flex justify-between items-center p-6 bg-white shadow-lg mb-6 rounded-lg mx-4 mt-4">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">Admin Dashboard</h1>
         <div class="flex items-center space-x-4">
-            <!-- Year Dropdown -->
-            <select id="yearSelect" class="border px-4 py-2 rounded-md">
+            <select id="yearSelect" class="border px-4 py-2 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
-                <!-- Add more years as needed -->
             </select>
-            <!-- Chart Filter Dropdown -->
-            <select id="chartFilter" class="border px-4 py-2 rounded-md">
+            <select id="chartFilter" class="border px-4 py-2 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
             </select>
@@ -27,169 +40,316 @@
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 p-6">
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="gradient-card p-6 rounded-xl shadow-md text-center">
             <i data-feather="dollar-sign" class="text-green-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Revenue</p>
-            <p id="totalRevenue" class="text-2xl font-bold">₹<%= totalRevenue %></p>
+            <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+            <p id="totalRevenue" class="text-3xl font-bold text-green-600">₹<%= totalRevenue %></p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="gradient-card p-6 rounded-xl shadow-md text-center">
             <i data-feather="shopping-cart" class="text-blue-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Orders</p>
-            <p id="totalOrders" class="text-2xl font-bold"><%= totalOrders %></p>
+            <p class="text-sm font-medium text-gray-600">Total Orders</p>
+            <p id="totalOrders" class="text-3xl font-bold text-blue-600"><%= totalOrders %></p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="gradient-card p-6 rounded-xl shadow-md text-center">
             <i data-feather="users" class="text-purple-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Customers</p>
-            <p id="totalCustomers" class="text-2xl font-bold"><%= totalCustomers %></p>
+            <p class="text-sm font-medium text-gray-600">Total Customers</p>
+            <p id="totalCustomers" class="text-3xl font-bold text-purple-600"><%= totalCustomers %></p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="gradient-card p-6 rounded-xl shadow-md text-center">
             <i data-feather="trending-up" class="text-orange-500 text-4xl mb-2"></i>
-            <p class="text-sm">Completed Orders</p>
-            <p id="completedOrders" class="text-2xl font-bold"><%= completedOrders %></p>
+            <p class="text-sm font-medium text-gray-600">Completed Orders</p>
+            <p id="completedOrders" class="text-3xl font-bold text-orange-600"><%= completedOrders %></p>
         </div>
     </div>
 
-    <!-- Combined Graph: Products, Categories, Brands -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-xl font-semibold mb-4">Top Products, Categories, and Brands</h2>
-        <canvas id="combinedChart"></canvas>
+    <!-- Products, Categories, and Brands Charts Grid -->
+    <!-- Products, Categories, and Brands Charts Grid -->
+<div class="grid grid-cols-1 gap-6 p-6">
+    <!-- Top Products Chart -->
+    <div class="chart-container bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-gray-700">Top Products</h2>
+        <canvas id="productsChart" style="width: 100%; height: 400px;"></canvas>
     </div>
 
-    <!-- Sales vs Revenue Graph -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-xl font-semibold mb-4">Sales vs Revenue</h2>
-        <canvas id="salesRevenueChart"></canvas>
+    <!-- Categories Chart -->
+    <div class="chart-container bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-gray-700">Categories Performance</h2>
+        <canvas id="categoriesChart" style="width: 100%; height: 400px;"></canvas>
+    </div>
+
+    <!-- Brands Chart -->
+    <div class="chart-container bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-gray-700">Brand Analysis</h2>
+        <canvas id="brandsChart" style="width: 100%; height: 400px;"></canvas>
+    </div>
+</div>
+
+
+    <!-- Sales, Revenue, and Market Share Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+        <!-- Sales Graph -->
+        <div class="chart-container bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Sales Trends</h2>
+            <canvas id="salesChart"></canvas>
+        </div>
+
+        <!-- Revenue Graph -->
+        <div class="chart-container bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Revenue Analysis</h2>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <!-- Market Share Chart -->
+        <!-- <div class="chart-container bg-white p-6 rounded-xl shadow-md col-span-2">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Market Distribution</h2>
+            <canvas id="marketShareChart"></canvas>
+        </div> -->
     </div>
 
     <!-- Generate Ledger Button -->
     <div class="p-6 text-center">
-        <button id="generateLedger" class="bg-blue-500 text-white px-6 py-3 rounded-md">Generate Ledger Book</button>
+        <button id="generateLedger" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1">
+            Generate Ledger Book
+        </button>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-    feather.replace(); // Initialize Feather Icons
+            feather.replace();
+            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",'<%= productQty %>')
+            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",JSON.parse('<%- topCategoryName %>'))
 
-    // Monthly and Yearly Data
-    const monthlySalesData = JSON.parse('<%- salesCount %>');
-    const yearlySalesData = JSON.parse('<%- totalSalesArray %>')
-    const monthlyRevenueData = JSON.parse('<%- revenue %>');
-    const yearlyRevenueData = JSON.parse('<%- totalRevenueArray %>')
-    let selectedYear = '2024'; // Initial year selection
-    let salesData = monthlySalesData[selectedYear];
-    let revenueData = monthlyRevenueData[selectedYear];
+            // Data initialization
+            const monthlySalesData = JSON.parse('<%- salesCount %>');
+            const yearlySalesData = JSON.parse('<%- totalSalesArray %>');
+            const monthlyRevenueData = JSON.parse('<%- revenue %>');
+            const yearlyRevenueData = JSON.parse('<%- totalRevenueArray %>');
 
-    // Combined Chart: Products, Categories, Brands
-    const combinedChart = new Chart(document.getElementById("combinedChart").getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: ['Product A', 'Product B', 'Product C', 'Product D'],
-            datasets: [
-                {
-                    label: "Top Products",
-                    data: [250, 200, 150, 100,90],
-                    backgroundColor: "rgba(255, 159, 64, 0.6)",
-                    borderColor: "rgba(255, 159, 64, 1)",
-                    borderWidth: 1
+            let selectedYear = '2024';
+            let salesData = monthlySalesData[selectedYear];
+            let revenueData = monthlyRevenueData[selectedYear];
+
+            const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const yearlyLabels = Array.from({length: 11}, (_, i) => (2020 + i).toString());
+            let currentLabels = monthlyLabels;
+
+            // Products Chart
+            
+            const productsChart = new Chart(document.getElementById("productsChart").getContext("2d"), {
+                type: "line",
+                data: {
+                    labels:JSON.parse('<%- productNames %>') ,
+                    datasets: [{
+                        label: "Top Products",
+                        data: JSON.parse('<%- productQty %>') ,
+                        backgroundColor: "rgba(99, 102, 241, 0.6)",
+                        borderColor: "rgb(99, 102, 241)",
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                {
-                    label: "Top Categories",
-                    data: [300, 250, 200, 150],
-                    backgroundColor: "rgba(153, 102, 255, 0.6)",
-                    borderColor: "rgba(153, 102, 255, 1)",
-                    borderWidth: 1
-                },
-                {
-                    label: "Top Brands",
-                    data: [350, 300, 250, 200],
-                    backgroundColor: "rgba(75, 192, 192, 0.6)",
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 1
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
                 }
-            ]
+            });
+
+            // Categories Chart
+            const categoriesChart = new Chart(document.getElementById("categoriesChart").getContext("2d"), {
+    type: "bar",
+    data: {
+        labels: JSON.parse('<%- topCategoryName %>'),
+        datasets: [{
+            data:   JSON.parse('<%- topCategorySales %>') ,
+            backgroundColor: "rgba(167, 139, 250, 0.6)",
+            borderColor: "rgb(167, 139, 250)",
+            borderWidth: 2,
+            borderRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }, // Hide legend
+            tooltip: { enabled: false } // Disable tooltips
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true }
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { display: false }
             },
-            scales: {
-                y: { beginAtZero: true }
+            x: {
+                grid: { display: false }
             }
         }
-    });
-
-    // Sales vs Revenue Chart
-    const salesRevenueChart = new Chart(document.getElementById("salesRevenueChart").getContext("2d"), {
-        type: "line",
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
-            datasets: [
-                {
-                    label: 'Sales',
-                    data: salesData,
-                    borderColor: "rgba(255, 159, 64, 1)",
-                    backgroundColor: "rgba(255, 159, 64, 0.2)",
-                    fill: true,
-                    borderWidth: 2
-                },
-                {
-                    label: 'Revenue',
-                    data: revenueData,
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    backgroundColor: "rgba(75, 192, 192, 0.2)",
-                    fill: true,
-                    borderWidth: 2
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true }
-            },
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-
-    // Year Select Change Event
-    document.getElementById("yearSelect").addEventListener("change", function (e) {
-        selectedYear = e.target.value; // Update the selected year
-
-        // Update sales and revenue data for the selected year
-        salesData = yearlySalesData;
-        revenueData = yearlyRevenueData;
-
-        // Update Sales vs Revenue Chart
-        salesRevenueChart.data.datasets[0].data = salesData;
-        salesRevenueChart.data.datasets[1].data = revenueData;
-        salesRevenueChart.data.labels = ["2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"]; // Example yearly labels
-        salesRevenueChart.update(); // Re-render the chart
-    });
-
-    // Filter Function to Toggle Between Monthly and Yearly
-    document.getElementById("chartFilter").addEventListener("change", function (e) {
-        const period = e.target.value;
-
-        if (period === "yearly") {
-            salesData = yearlySalesData; // Update to yearly data
-            revenueData = yearlyRevenueData; // Update to yearly data
-            salesRevenueChart.data.labels = ["2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"]; // Update labels for yearly data
-        } else {
-            salesData = monthlySalesData[selectedYear]; // Update to monthly data
-            revenueData = monthlyRevenueData[selectedYear]; // Update to monthly data
-            salesRevenueChart.data.labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]; // Update labels for monthly data
-        }
-
-        // Update Sales vs Revenue Chart
-        salesRevenueChart.data.datasets[0].data = salesData;
-        salesRevenueChart.data.datasets[1].data = revenueData;
-        salesRevenueChart.update(); // Re-render the chart
-    });
+    }
 });
 
+
+            // Brands Chart
+            const brandsChart = new Chart(document.getElementById("brandsChart").getContext("2d"), {
+                type: "radar",
+                data: {
+                    labels: JSON.parse('<%- topBrandNames %>') ,
+                    datasets: [{
+                        label: "Brand Metrics",
+                        data: JSON.parse('<%- topBrandQty %>'),
+                        backgroundColor: "rgba(236, 72, 153, 0.2)",
+                        borderColor: "rgb(236, 72, 153)",
+                        borderWidth: 2,
+                        pointBackgroundColor: "rgb(236, 72, 153)"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Sales Chart
+            const salesChart = new Chart(document.getElementById("salesChart").getContext("2d"), {
+                type: "line",
+                data: {
+                    labels: currentLabels,
+                    datasets: [{
+                        label: 'Sales',
+                        data: salesData,
+                        borderColor: "rgb(99, 102, 241)",
+                        backgroundColor: "rgba(99, 102, 241, 0.1)",
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Chart
+            const revenueChart = new Chart(document.getElementById("revenueChart").getContext("2d"), {
+                type: "bar",
+                data: {
+                    labels: currentLabels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: revenueData,
+                        backgroundColor: "rgba(236, 72, 153, 0.6)",
+                        borderColor: "rgb(236, 72, 153)",
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Market Share Chart
+            // const marketShareChart = new Chart(document.getElementById("marketShareChart").getContext("2d"), {
+            //     type: 'doughnut',
+            //     data: {
+            //         labels: ['Online', 'Retail', 'Wholesale', 'Direct'],
+            //         datasets: [{
+            //             data: [35, 30, 20, 15],
+            //             backgroundColor: [
+            //                 'rgba(99, 102, 241, 0.8)',
+            //                 'rgba(167, 139, 250, 0.8)',
+            //                 'rgba(236, 72, 153, 0.8)',
+            //                 'rgba(251, 146, 60, 0.8)'
+            //             ],
+            //             borderWidth: 2,
+            //             borderColor: '#ffffff'
+            //         }]
+            //     },
+            //     options: {
+            //         responsive: true,
+            //         plugins: {
+            //             legend: {
+            //                 position: 'bottom'
+            //             }
+            //         },
+            //         cutout: '70%'
+            //     }
+            // });
+
+            // Event Listeners
+            document.getElementById("yearSelect").addEventListener("change", function(e) {
+                selectedYear = e.target.value;
+                updateCharts();
+            });
+
+            document.getElementById("chartFilter").addEventListener("change", function(e) {
+                const period = e.target.value;
+                currentLabels = period === "yearly" ? yearlyLabels : monthlyLabels;
+                salesData = period === "yearly" ? yearlySalesData : monthlySalesData[selectedYear];
+                revenueData = period === "yearly" ? yearlyRevenueData : monthlyRevenueData[selectedYear];
+                updateCharts();
+            });
+
+            // Generate Ledger Button Event Listener
+            document.getElementById("generateLedger").addEventListener("click", function() {
+                // Add ledger generation logic here
+                console.log("Generating ledger...");
+            });
+
+            function updateCharts() {
+                salesChart.data.labels = currentLabels;
+                revenueChart.data.labels = currentLabels;
+                
+                salesChart.data.datasets[0].data = salesData;
+                revenueChart.data.datasets[0].data = revenueData;
+                
+                salesChart.update();
+                revenueChart.update();
+            }
+        });
     </script>
 </body>
 </html>
