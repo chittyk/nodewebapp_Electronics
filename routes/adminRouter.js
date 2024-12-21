@@ -50,7 +50,7 @@ router.post('/addBrand', adminAuth, uploads.single('image'), brandController.add
 
 router.get("/blockBrand/:id", adminAuth, brandController.blockBrand);
 router.get("/unblockBrand/:id", adminAuth, brandController.unblockBrand);
-router.get("/deleteBrand/:id", adminAuth, brandController.deleteBrand);
+router.get("/deleteBrand/:id", adminAuth, brandController.deleteBrand); 
 
 
 //add product

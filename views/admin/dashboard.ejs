@@ -108,16 +108,80 @@
 
     <!-- Generate Ledger Button -->
     <div class="p-6 text-center">
-        <button id="generateLedger" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1">
+        <button id="downloadPDF" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1">
             Generate Ledger Book
         </button>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
+document.getElementById('downloadPDF').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    // Add a title
+    pdf.setFontSize(18);
+    pdf.text("Ledger Book", 105, 10, null, null, "center");
+
+    // Add a subtitle with the current date
+    pdf.setFontSize(12);
+    pdf.text("Generated on: " + new Date().toLocaleDateString(), 105, 20, null, null, "center");
+
+    // Add table headers
+    pdf.setFontSize(14);
+    pdf.text("Date", 10, 40);
+    pdf.text("Order ID", 40, 40);
+    pdf.text("Debit", 140, 40);
+    pdf.text("Credit", 160, 40);
+
+    pdf.setFontSize(12);
+    pdf.line(10, 45, 200, 45); // Add a line for the table header
+
+    // Assuming `regData` is passed to the template, here we parse it
+    const staticData = JSON.parse('<%- regData %>');  // Ensure that `regData` is a stringified JSON object
+
+    // Start at the row below the header (50)
+    staticData.forEach((item, index) => {
+        const yPosition = 50 + index * 10;
+
+        // Add date and description with default color
+        pdf.setTextColor(0, 0, 0);  // Black color
+        pdf.text(item.date, 10, yPosition);
+        pdf.text(item.description, 40, yPosition);
+
+        // Add debit in red
+        pdf.setTextColor(255, 0, 0);  // Red color
+        pdf.text(item.debit.toString(), 140, yPosition);
+
+        // Add credit in green
+        pdf.setTextColor(0, 128, 0);  // Green color
+        pdf.text(`${item.credit.toString()}/-`, 160, yPosition);
+    });
+
+    // Set text color to green for the balance
+    pdf.setTextColor(0, 128, 0);  // Green color
+
+    // Get the total balance, assuming you want to sum the credit and debit for balance
+    let totalBalance = 0;
+    staticData.forEach(item => {
+        totalBalance += item.credit - item.debit;
+    });
+
+    // Add balance at the top-right corner
+    pdf.text(`Balance: ${totalBalance.toString()}/-`, 140, 30);  // Adjusted for top-right corner
+
+    // Save the PDF
+    pdf.save("ledger_book.pdf");
+});
+
+
+
+
+
         document.addEventListener("DOMContentLoaded", function () {
             feather.replace();
-            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",'<%= productQty %>')
-            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",JSON.parse('<%- topCategoryName %>'))
+            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",'<%= regData %>')
+            console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",JSON.parse('<%- regData %>'))
 
             // Data initialization
             const monthlySalesData = JSON.parse('<%- salesCount %>');

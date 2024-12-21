@@ -42,6 +42,7 @@ const verifyLogin = async (req, res) => {
             console.log('Login failed');
             return res.render('adminlogin',{message:'invalid password or admin name'});
         }
+
     } catch (error) {   
         console.error('Error in login:', error);
         return res.render('adminlogin',{message:'error in server'});
@@ -313,8 +314,37 @@ const dashboard = async (req, res) => {
             topBrandQty.push(brand.totalQuantitySold)
         });
 
+        let regData  = []
 
 
+        orders.forEach(order => {
+            if(order.status==="Delivered"){
+                let data = {
+                    date :(function() {
+                        const isoDate = order.createdOn
+                    
+                        // Create a Date object from the ISO string
+                        const date = new Date(isoDate);
+                    
+                        // Get the day, month, and year
+                        const day = String(date.getDate()).padStart(2, '0'); // Add leading zero if needed
+                        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+                        const year = date.getFullYear();
+                    
+                        // Format in dd/mm/yyyy
+                        const formattedDate = `${day}/${month}/${year}`;
+                    
+                        return formattedDate
+                    })(),
+                    description:order.orderId,
+                    debit:0,
+                    credit:order.finalAmount,
+
+                    
+                }
+                regData.push(data)
+            }
+        });
 
 
         console.log('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',topSellingBrands )
@@ -343,6 +373,7 @@ const dashboard = async (req, res) => {
             topCategorySales: JSON.stringify(topCategorySales),
             topBrandNames: JSON.stringify(topBrandNames),
             topBrandQty: JSON.stringify(topBrandQty),
+            regData:JSON.stringify(regData)
         });
     } catch (error) {
         console.error('Error in redirecting to dashboard:', error.message, error.stack);

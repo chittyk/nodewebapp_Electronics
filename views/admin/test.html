@@ -3,296 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
+    <title>Ledger Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800" style="margin-left: 240px; width: calc(100% - 240px);">
+<body>
 
-    <!-- Dashboard Header -->
-    <header class="flex justify-between items-center p-6 bg-white shadow-md mb-6">
-        <h1 class="text-3xl font-semibold">Admin Dashboard</h1>
-        <select id="chartFilter" class="border px-4 py-2 rounded-md">
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-        </select>
-    </header>
+    <h1>Ledger Book</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2023-01-01</td>
+                <td>Initial Deposit</td>
+                <td>$0.00</td>
+                <td>$1000.00</td>
+                <td>$1000.00</td>
+            </tr>
+            <tr>
+                <td>2023-01-05</td>
+                <td>Office Supplies</td>
+                <td>$200.00</td>
+                <td>$0.00</td>
+                <td>$800.00</td>
+            </tr>
+            <tr>
+                <td>2023-01-10</td>
+                <td>Client Payment</td>
+                <td>$0.00</td>
+                <td>$500.00</td>
+                <td>$1300.00</td>
+            </tr>
+            <tr>
+                <td>2023-01-15</td>
+                <td>Utilities</td>
+                <td>$150.00</td>
+                <td>$0.00</td>
+                <td>$1150.00</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 p-6">
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
-            <i data-feather="dollar-sign" class="text-green-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Revenue</p>
-            <p id="totalRevenue" class="text-2xl font-bold">₹500,000</p>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
-            <i data-feather="shopping-cart" class="text-blue-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Orders</p>
-            <p id="totalOrders" class="text-2xl font-bold">1200</p>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
-            <i data-feather="users" class="text-purple-500 text-4xl mb-2"></i>
-            <p class="text-sm">Total Customers</p>
-            <p id="totalCustomers" class="text-2xl font-bold">800</p>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-md text-center">
-            <i data-feather="trending-up" class="text-orange-500 text-4xl mb-2"></i>
-            <p class="text-sm">Completed Orders</p>
-            <p id="completedOrders" class="text-2xl font-bold">1100</p>
-        </div>
-    </div>
-
-    <!-- Combined Graph: Products, Categories, Brands -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-xl font-semibold mb-4">Top Products, Categories, and Brands</h2>
-        <canvas id="combinedChart"></canvas>
-    </div>
-
-    <!-- Sales vs Revenue Graph -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-xl font-semibold mb-4">Sales vs Revenue</h2>
-        <canvas id="salesRevenueChart"></canvas>
-    </div>
-
-    <!-- Generate Ledger Button -->
-    <div class="p-6 text-center">
-        <button id="generateLedger" class="bg-blue-500 text-white px-6 py-3 rounded-md">Generate Ledger Book</button>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            feather.replace(); // Initialize Feather Icons
-
-            // Monthly and Yearly Data
-            const monthlySalesData = [100, 200, 150, 180];
-            const yearlySalesData = [1200, 2200, 2500, 3000];
-            const monthlyRevenueData = [50000, 70000, 65000, 80000];
-            const yearlyRevenueData = [600000, 850000, 950000, 1000000];
-
-            let salesData = monthlySalesData;
-            let revenueData = monthlyRevenueData;
-
-            // Combined Chart: Products, Categories, Brands
-            const combinedChart = new Chart(document.getElementById("combinedChart").getContext("2d"), {
-                type: "bar",
-                data: {
-                    labels: ['Product A', 'Product B', 'Product C', 'Product D'],
-                    datasets: [
-                        {
-                            label: "Top Products",
-                            data: [250, 200, 150, 100],
-                            backgroundColor: "rgba(255, 159, 64, 0.6)",
-                            borderColor: "rgba(255, 159, 64, 1)",
-                            borderWidth: 1
-                        },
-                        {
-                            label: "Top Categories",
-                            data: [300, 250, 200, 150],
-                            backgroundColor: "rgba(153, 102, 255, 0.6)",
-                            borderColor: "rgba(153, 102, 255, 1)",
-                            borderWidth: 1
-                        },
-                        {
-                            label: "Top Brands",
-                            data: [350, 300, 250, 200],
-                            backgroundColor: "rgba(75, 192, 192, 0.6)",
-                            borderColor: "rgba(75, 192, 192, 1)",
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-
-            // Sales vs Revenue Chart
-            const salesRevenueChart = new Chart(document.getElementById("salesRevenueChart").getContext("2d"), {
-                type: "line",
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                    datasets: [
-                        {
-                            label: 'Sales',
-                            data: salesData,
-                            borderColor: "rgba(255, 159, 64, 1)",
-                            backgroundColor: "rgba(255, 159, 64, 0.2)",
-                            fill: true,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Revenue',
-                            data: revenueData,
-                            borderColor: "rgba(75, 192, 192, 1)",
-                            backgroundColor: "rgba(75, 192, 192, 0.2)",
-                            fill: true,
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-
-            // Filter Function to Toggle Between Monthly and Yearly
-            document.getElementById("chartFilter").addEventListener("change", function (e) {
-                const period = e.target.value;
-
-                if (period === "yearly") {
-                    salesData = yearlySalesData;
-                    revenueData = yearlyRevenueData;
-                } else {
-                    salesData = monthlySalesData;
-                    revenueData = monthlyRevenueData;
-                }
-
-                // Update Sales vs Revenue Chart
-                salesRevenueChart.data.datasets[0].data = salesData;
-                salesRevenueChart.data.datasets[1].data = revenueData;
-                salesRevenueChart.update();
-            });
-
-            // Ledger Button
-            document.getElementById("generateLedger").addEventListener("click", function () {
-                alert("Ledger book generated!");
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            feather.replace(); // Initialize Feather Icons
-    
-            // Monthly and Yearly Data
-            const monthlySalesData = [100, 200, 150, 180];
-            const yearlySalesData = [1200, 2200, 2500, 3000];
-            const monthlyRevenueData = [50000, 70000, 65000, 80000];
-            const yearlyRevenueData = [600000, 850000, 950000, 1000000];
-    
-            let salesData = monthlySalesData;
-            let revenueData = monthlyRevenueData;
-    
-            // Combined Chart: Products, Categories, Brands
-            const combinedChart = new Chart(document.getElementById("combinedChart").getContext("2d"), {
-                type: "bar",
-                data: {
-                    labels: ['Product A', 'Product B', 'Product C', 'Product D'],
-                    datasets: [
-                        {
-                            label: "Top Products",
-                            data: [250, 200, 150, 100],
-                            backgroundColor: "rgba(255, 159, 64, 0.6)",
-                            borderColor: "rgba(255, 159, 64, 1)",
-                            borderWidth: 1
-                        },
-                        {
-                            label: "Top Categories",
-                            data: [300, 250, 200, 150],
-                            backgroundColor: "rgba(153, 102, 255, 0.6)",
-                            borderColor: "rgba(153, 102, 255, 1)",
-                            borderWidth: 1
-                        },
-                        {
-                            label: "Top Brands",
-                            data: [350, 300, 250, 200],
-                            backgroundColor: "rgba(75, 192, 192, 0.6)",
-                            borderColor: "rgba(75, 192, 192, 1)",
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-    
-            // Sales vs Revenue Chart
-            const salesRevenueChart = new Chart(document.getElementById("salesRevenueChart").getContext("2d"), {
-                type: "line",
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                    datasets: [
-                        {
-                            label: 'Sales',
-                            data: salesData,
-                            borderColor: "rgba(255, 159, 64, 1)",
-                            backgroundColor: "rgba(255, 159, 64, 0.2)",
-                            fill: true,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Revenue',
-                            data: revenueData,
-                            borderColor: "rgba(75, 192, 192, 1)",
-                            backgroundColor: "rgba(75, 192, 192, 0.2)",
-                            fill: true,
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-    
-            // Filter Function to Toggle Between Monthly and Yearly
-            document.getElementById("chartFilter").addEventListener("change", function (e) {
-                const period = e.target.value;
-    
-                if (period === "yearly") {
-                    salesData = yearlySalesData;
-                    revenueData = yearlyRevenueData;
-                } else {
-                    salesData = monthlySalesData;
-                    revenueData = monthlyRevenueData;
-                }
-    
-                // Update Sales vs Revenue Chart
-                salesRevenueChart.data.datasets[0].data = salesData;
-                salesRevenueChart.data.datasets[1].data = revenueData;
-    
-                // Update the labels for "Sales vs Revenue" chart based on the selected period
-                if (period === "yearly") {
-                    salesRevenueChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr'];
-                } else {
-                    salesRevenueChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr'];
-                }
-    
-                // Re-render the chart with updated data
-                salesRevenueChart.update();
-            });
-    
-            // Ledger Button
-            document.getElementById("generateLedger").addEventListener("click", function () {
-                alert("Ledger book generated!");
-            });
-        });
-    </script>
-    
 </body>
 </html>
