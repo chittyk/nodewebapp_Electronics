@@ -57,7 +57,7 @@
                         </div>
                         
                         <!-- New button for downloading the sales report, aligned to the right -->
-                        <button id="downloadBtn" onclick="downloadPDF()" class="btn report-btn btn-success">Download Sales Report</button>
+                        <button id="downloadSalesReport"  class="btn report-btn btn-success">Download Sales Report</button>
                         
                     </div>
                     
@@ -146,24 +146,98 @@
 
 
         <script>
-            async function downloadPDF() {
-              try {
-                const response = await fetch('/admin/generate-pdf');
-                if (!response.ok) throw new Error('Failed to generate PDF');
-                const blob = await response.blob();
-      
-                // Create a download link for the PDF
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = 'sales_report.pdf';
-                link.click();
-              } catch (error) {
-                console.error(error);
-                alert('Error generating PDF!');
-              }
-            } 
+        document.getElementById('downloadSalesReport').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    // Define margins and spacing
+    const marginLeft = 10;
+    const marginTop = 10;
+    const lineSpacing = 10;
+    const pageWidth = 200; // Width of the PDF page (A4 size in portrait)
+
+    // Add a title
+    pdf.setFontSize(18);
+    pdf.setTextColor(40, 116, 166); // Set title color (blue shade)
+    pdf.text("Sales Report", pageWidth / 2, marginTop + 10, null, null, "center");
+
+    // Add a subtitle with the current date
+    pdf.setFontSize(12);
+    pdf.setTextColor(100); // Gray color for subtitle
+    pdf.text(
+        "Generated on: " + new Date().toLocaleDateString(),
+        pageWidth / 2,
+        marginTop + 20,
+        null,
+        null,
+        "center"
+    );
+
+    // Add table headers with a background color
+    pdf.setFillColor(23, 162, 184); // Background color for headers (teal)
+    pdf.rect(marginLeft, marginTop + 35, pageWidth - 2 * marginLeft, 10, 'F'); // Filled rectangle
+    pdf.setFontSize(12);
+    pdf.setTextColor(255, 255, 255); // White color for headers
+    pdf.text("Date", marginLeft, marginTop + 42);
+    pdf.text("Total Revenue", marginLeft + 30, marginTop + 42);
+    pdf.text("Total Sales", marginLeft + 80, marginTop + 42);
+    pdf.text("Discounts", marginLeft + 110, marginTop + 42);
+    pdf.text("Coupons", marginLeft + 140, marginTop + 42);
+    pdf.text("Orders", marginLeft + 170, marginTop + 42);
+
+    // Add table rows
+    let currentY = marginTop + 50;
+
+    const salesData = JSON.parse('<%- salesReport1 %>') // Replace with dynamic data
+
+    salesData.forEach((item, index) => {
+        // Prevent overflow and create new pages if necessary
+        if (currentY > 280) { // Adjust to fit within A4 size page height
+            pdf.addPage();
+            currentY = marginTop + 10;
+        }
+
+        // Alternate row background colors
+        if (index % 2 === 0) {
+            pdf.setFillColor(240, 248, 255); // Light blue for alternate rows
+            pdf.rect(marginLeft, currentY - 7, pageWidth - 2 * marginLeft, 10, 'F'); // Filled rectangle
+        }
+
+        // Add data rows
+        pdf.setFontSize(10);
+        pdf.setTextColor(0, 0, 0); // Reset to black for text
+        pdf.text(new Date(item.date).toLocaleDateString(), marginLeft, currentY);
+        pdf.setFontSize(11).setTextColor(0, 128, 0); // Green color for Total Revenue
+        pdf.text(`${item.totalRevenue.toFixed(2)}/-`, marginLeft + 30, currentY);
+        pdf.setFontSize(10).setTextColor(0, 0, 0); // Reset to black for other fields
+        pdf.text(item.totalSales.toString(), marginLeft + 80, currentY);
+        pdf.text(`0.00/-`, marginLeft + 110, currentY); // Assuming discounts are 0
+        pdf.text(`${item.coupon.toFixed(2)}/-`, marginLeft + 140, currentY);
+        pdf.text(item.totalOrders.toString(), marginLeft + 170, currentY);
+
+        currentY += lineSpacing; // Move to the next row
+    });
+
+    // Add a footer
+    pdf.setFontSize(10);
+    pdf.setTextColor(100); // Gray color for footer
+    pdf.text(
+        "© 2024 Sales Report Inc. All rights reserved.",
+        pageWidth / 2,
+        290,
+        null,
+        null,
+        "center"
+    );
+
+    // Save the PDF
+    pdf.save("sales_report.pdf");
+});
+
+
           </script>
 
+        
 
 
         <!-- SweetAlert2 CSS -->
