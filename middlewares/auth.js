@@ -50,6 +50,19 @@ const userAuth = (req, res, next) => {
     }
 };
 
+
+const isLogin = (req, res, next) => {
+    if (!req.session.user) {
+        next();
+    
+            
+    } else {
+        res.redirect('/');
+    }
+};
+
+
+
 const adminAuth = (req, res, next) => {
     if (req.session.admin) {
         User.findOne({ _id: req.session.admin._id, isAdmin: true })
@@ -73,5 +86,6 @@ module.exports = {
     userAuth,
     adminAuth,
     cartAuth,
-    removeCartSession
+    removeCartSession,
+    isLogin
 };

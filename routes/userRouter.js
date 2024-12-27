@@ -26,7 +26,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { userAuth, adminAuth, cartAuth, removeCartSession } = require('../middlewares/auth');
+const { userAuth, adminAuth, cartAuth,isLogin, removeCartSession } = require('../middlewares/auth');
 
 const userController =require('../controllers/user/userController');
 const passport = require('passport');
@@ -34,6 +34,7 @@ const profileController =require('../controllers/user/profileController')
 const cartController =require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
 const couponController=require("../controllers/user/couponController")
+const aboutController=require("../controllers/user/aboutController")
 
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
@@ -47,12 +48,12 @@ const razorpay = new Razorpay({
 // Routes
 router.get('/pageNotFound', userController.pageNotFound);
 router.get('/', userController.loadHomepage);
-router.get('/signLog', userController.signLog);
-router.post('/signup', userController.signup);
-router.get('/login', userController.getlogin);
-router.post('/login',userController.login)
-router.post('/verify-otp', userController.verifyOtp);
-router.post('/resend-otp', userController.resendOtp);
+router.get('/signLog', isLogin,userController.signLog);
+router.post('/signup',isLogin, userController.signup);
+router.get('/login',isLogin, userController.getlogin);
+router.post('/login',isLogin,userController.login)
+router.post('/verify-otp',isLogin, userController.verifyOtp);
+router.post('/resend-otp',isLogin, userController.resendOtp);
 
 
 // Google Authentication Route
@@ -114,6 +115,10 @@ router.get('/advancedSearch', userAuth, userController.advancedSearch);
 router.get('/wishlist',userAuth,wishlistController.getWishlist)
 router.post('/addToWishlist',userAuth,wishlistController.addToWishlist)
 router.get('/removeFormWishlist',userAuth,wishlistController.removeProduct)
+
+//about session
+router.get('/about',aboutController.getAboutPage)
+
 
 //cart management
 router.post('/cart',userAuth,cartController.postCart)
