@@ -79,6 +79,9 @@
                                     <%= new Date(order.createdOn).toLocaleTimeString('en-US') %>
                             </td>
                             <td>
+                                <% if (order.status == "Returned") {%>
+                                    <p class="text-danger" >Returned</p>
+                                <%} else  {%>
                                 <select class="form-control form-control-sm"
                                     onchange="changeStatus(this.value, '<%= order.orderId %>')">
                                     <option value="">Update Status</option>
@@ -95,18 +98,23 @@
                                     <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned
                                     </option>
                                 </select>
+                                <% } %>
+                                
                             </td>
                         </tr>
+                        
                         <% }); } else { %>
                             <tr>
                                 <td colspan="6" class="text-center">No orders found</td>
                             </tr>
                             <% } %>
+                        
                 </tbody>
 
             </table>
             <div class="row justify-content-center mt-4">
     <nav>
+    
         <ul class="pagination">
             <% for (let i = 1; i <= totalPages; i++) { %>
                 <li class="page-item <%= i === page ? 'active' : '' %>">
@@ -182,6 +190,7 @@
                                     Swal.fire("Updated!", response.message, "success");
                                     // Update the status cell in the table
                                     document.getElementById(`status-${orderId}`).textContent = newStatus;
+                                    location.reload()
                                 },
                                 error: error => {
                                     Swal.fire("Error!", error.responseJSON.message || "Failed to update status", "error");

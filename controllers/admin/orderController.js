@@ -2,56 +2,59 @@ const Order = require('../../models/orderSchema');
 const User = require('../../models/userSchema')
 const Product = require('../../models/productSchema');
 const Address = require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema')
+
+
 
 const getOrders = async (req, res) => {
     try {
-        // Get page and limit from query params (default to 1 and 20)
-        const page = parseInt(req.query.page) || 1; // Pagination page
-        const limit = 20; // Items per page
-        const skip = (page - 1) * limit; // Calculate how many items to skip
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
 
-        // Fetch the orders with pagination
+        console.log(`Fetching orders with page=${page}, limit=${limit}, skip=${skip}`);
+
+        // Fetch orders with sorting and pagination
         const orders = await Order.find({})
+            .sort({ createdOn: -1 })
             .skip(skip)
             .limit(limit);
+        console.log('Orders fetched:', orders);
 
-        // Get total number of orders for calculating total pages
-        const totalOrders = await Order.countDocuments({}); // Total orders in DB
-        const totalPages = Math.ceil(totalOrders / limit); // Total pages for pagination
-
-        // Fetch user and product data as before
+        // Get total number of orders
+        const totalOrders = await Order.countDocuments({});
+        const totalPages = Math.ceil(totalOrders / limit);
+        const adminId = await User.findOne({ _id: req.session.user })
+        // Fetch all users and products
         const user = await User.find({});
         const product = await Product.find({});
-
+        console.log('Users fetched:', user);
+        console.log('Products fetched:', product);
+        console.log("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn", req.session)
         const result = [];
 
-        for (let i = 0; i < orders.length; i++) {
-            const order = orders[i];
+        for (const order of orders) {
+            const datas = {
+                orderId: order.orderId,
+                userId: order.userId,
+            };
 
-            let datas = {};
-            datas.orderId = order.orderId;
-            datas.userId = order.userId;
-
-            for (let j = 0; j < user.length; j++) {
-                const user1 = user[j];
-                if (user1._id.toString() === order.userId.toString()) {
-                    datas.userName = user1.name;
-                }
+            // Map user data
+            const user1 = user.find(u => u._id?.toString() === order.userId?.toString());
+            if (user1) {
+                datas.userName = user1.name;
+            } else {
+                console.log(`No user found for userId: ${order.userId}`);
             }
 
+            // Map ordered items
             datas.orderedItems = order.orderedItems.map(item => {
+                const product1 = product.find(p => p._id?.toString() === item.product?.toString());
                 return {
                     itemProduct: item.product,
                     itemQuantity: item.quantity,
                     itemPrice: item.price,
-                    itemName: (() => {
-                        for (let i = 0; i < product.length; i++) {
-                            const product1 = product[i];
-                            if (product1._id.toString() === item.product.toString()) {
-                                return product1.productName;
-                            }
-                        }
-                    })()
+                    itemName: product1 ? product1.productName : 'Unknown Product',
                 };
             });
 
@@ -86,6 +89,7 @@ const getOrders = async (req, res) => {
 
 
 
+
 const changeStatus = async (req, res) => {
     try {
         const { sta, orderId } = req.body;
@@ -100,6 +104,12 @@ const changeStatus = async (req, res) => {
             { orderId: orderId },
             { $set: { status: sta } }
         );
+
+        const adminId = await Order.findOne({ _id: req.session.admin._id })
+        console.log("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn", adminId)
+
+
+
 
         // Check if any document was modified
         if (updateResult.modifiedCount === 0) {
@@ -141,94 +151,164 @@ const removeFromHistory = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to remove order from the database due to server error.' });
     }
 };
+
+
+
 const updateOrders = async (req, res) => {
     const { orderId, status } = req.body;
 
+    console.log("Processing order update...");
+
+    // Validate request body
     if (!orderId || !status) {
         return res.status(400).json({ message: "Order ID and status are required" });
     }
 
+    // Validate session and admin ID
+    const adminId = req.session.admin?._id;
+    if (!adminId) {
+        return res.status(401).json({ message: "Admin not authenticated" });
+    }
+
     try {
-        // Update the order status in the database
+        // Find and update the order status
         const updatedOrder = await Order.findOneAndUpdate(
-            { orderId }, // Find the order by orderId
-            { $set: { status } }, // Update the status field
-            { new: true } // Return the updated document
+            { orderId },
+            { $set: { status } },
+            { new: true }
         );
 
         if (!updatedOrder) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        res.json({ message: "Order status updated successfully", order: updatedOrder });
+        // Fetch admin wallet details
+        const adminWallet = await Wallet.findOne({ userId: adminId });
+        if (!adminWallet) {
+            return res.status(404).json({ message: "Admin wallet not found" });
+        }
+
+        // Ensure returnPrice is valid
+        const returnPrice = updatedOrder.finalAmount;
+        if (typeof returnPrice !== "number" || returnPrice <= 0) {
+            return res.status(400).json({ message: "Invalid order amount" });
+        }
+
+        // Fetch user wallet details
+        const userWallet = await Wallet.findOne({ userId: updatedOrder.userId });
+        if (!userWallet) {
+            return res.status(404).json({ message: "User wallet not found" });
+        }
+
+        // Check if admin has sufficient balance
+        if (adminWallet.balance < returnPrice) {
+            return res.status(400).json({ message: "Insufficient admin wallet balance" });
+        }
+
+        // Prepare the transactions for both admin and user
+        const userTransaction = {
+            transactionType: "credit",  // The user is credited
+            amount: returnPrice,
+            date: new Date().toISOString(), // Use ISO 8601 format for consistency
+            description:"DiyElectro"
+        };
+
+        const adminTransaction = {
+            transactionType: "debit",  // Admin wallet is debited
+            amount: returnPrice,
+            date: new Date().toISOString(), // Use ISO 8601 format for consistency
+            description:updatedOrder.userId
+        };
+
+        // Update wallet balances and transaction histories
+        adminWallet.balance -= returnPrice;
+        userWallet.balance += returnPrice;
+
+        adminWallet.transactions.push(adminTransaction);
+        userWallet.transactions.push(userTransaction);
+
+        // Save the updated wallet details
+        await adminWallet.save();
+        await userWallet.save();
+
+        // Log the admin wallet details after update (for debugging purposes)
+        console.log("Admin wallet after update:", adminWallet);
+
+        // Send response indicating success
+        res.json({
+            message: "Order status updated and transaction completed successfully",
+            order: updatedOrder,
+        });
+
     } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ message: "Failed to update order status" });
     }
 };
-// const mongoose = require('mongoose'); // Import mongoose to use ObjectId
-const orderDetails = async (req, res) => {
-    try {
-        const orderId = req.query.id; 
-        console.log('Order ID:', orderId);
 
-        // Fetch all products from the database
-        const products = await Product.find({});
+    // const mongoose = require('mongoose'); // Import mongoose to use ObjectId
+    const orderDetails = async (req, res) => {
+        try {
+            const orderId = req.query.id;
+            console.log('Order ID:', orderId);
 
-        // Fetch the order by its ID
-        const orders = await Order.findOne({ orderId: orderId }).exec();
-        if (!orders) {
-            return res.status(404).render('error', { message: 'Order not found' });
+            // Fetch all products from the database
+            const products = await Product.find({});
+
+            // Fetch the order by its ID
+            const orders = await Order.findOne({ orderId: orderId }).exec();
+            if (!orders) {
+                return res.status(404).render('error', { message: 'Order not found' });
+            }
+
+            // Fetch the user associated with the order
+            const user = await User.findOne({ _id: orders.userId }).exec();
+            if (!user) {
+                return res.status(404).render('error', { message: 'User not found' });
+            }
+
+            // Fetch the address of the user
+            const address = await Address.findOne({ userId: orders.userId }).exec();
+            if (!address) {
+                return res.status(404).render('error', { message: 'Address not found' });
+            }
+
+            // Get the selected address
+            const selectedAddress = address.address.find(addr => addr.isSelected);
+            if (!selectedAddress) {
+                return res.status(404).render('error', { message: 'Selected address not found' });
+            }
+
+            // Get the product IDs from the ordered items
+            const productIds = orders.orderedItems.map(item => item.product);
+
+            console.log("Product IDs:", productIds);
+
+            // Convert productIds to ObjectId objects for accurate comparison
+            const orderedProducts = products.filter(product =>
+                productIds.some(productId => productId.equals(product._id))
+            );
+
+            console.log('Ordered Products:', orderedProducts);
+
+            console.log('Selected Address:', selectedAddress);
+
+            // Render the orderDetails view with the fetched data
+            res.render('orders-details', { orders, user, selectedAddress, orderedProducts });
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+
+            // Fallback if 'error' view doesn't exist
+            res.status(500).render('error', { message: 'Failed to fetch order details' });
         }
+    };
 
-        // Fetch the user associated with the order
-        const user = await User.findOne({ _id: orders.userId }).exec();
-        if (!user) {
-            return res.status(404).render('error', { message: 'User not found' });
-        }
 
-        // Fetch the address of the user
-        const address = await Address.findOne({ userId: orders.userId }).exec();
-        if (!address) {
-            return res.status(404).render('error', { message: 'Address not found' });
-        }
 
-        // Get the selected address
-        const selectedAddress = address.address.find(addr => addr.isSelected);
-        if (!selectedAddress) {
-            return res.status(404).render('error', { message: 'Selected address not found' });
-        }
-        
-        // Get the product IDs from the ordered items
-        const productIds = orders.orderedItems.map(item => item.product);
-
-        console.log("Product IDs:", productIds);
-
-        // Convert productIds to ObjectId objects for accurate comparison
-        const orderedProducts = products.filter(product =>
-            productIds.some(productId => productId.equals(product._id))
-        );
-        
-        console.log('Ordered Products:', orderedProducts);
-
-        console.log('Selected Address:', selectedAddress);
-
-        // Render the orderDetails view with the fetched data
-        res.render('orders-details', { orders, user, selectedAddress, orderedProducts });
-    } catch (error) {
-        console.error('Error fetching order details:', error);
-
-        // Fallback if 'error' view doesn't exist
-        res.status(500).render('error', { message: 'Failed to fetch order details' });
+    module.exports = {
+        getOrders,
+        changeStatus,
+        removeFromHistory,
+        updateOrders,
+        orderDetails
     }
-};
-
-
-
-module.exports = {
-    getOrders,
-    changeStatus,
-    removeFromHistory,
-    updateOrders,
-    orderDetails
-};

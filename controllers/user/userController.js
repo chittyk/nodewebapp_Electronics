@@ -333,6 +333,8 @@ const Product = require('../../models/productSchema')
 const Banner = require('../../models/BannerSchema')
 const Brand =require('../../models/brandSchema')
 const bcrypt = require("bcrypt");
+const Wallet = require('../../models/walletSchema');
+
 
 const { create } = require("hbs");
 const { query } = require("express");
@@ -514,21 +516,31 @@ const verifyOtp = async (req, res) => {
         password: passwordHash,
       });
 
-      // Save user data to the database
       try {
-        await saveUserData.save(); // This needs to be inside a try-catch block
-        req.session.User = saveUserData._id; // Store user ID in the session
+        // Save user data to the database
+        const savedUser = await saveUserData.save();
+
+        // Create a wallet for the new user
+        const newWallet = new Wallet({
+          userId: savedUser._id, // Associate wallet with the user
+          balance: 0, // Initial balance
+          transactions: [], // No transactions initially
+        });
+
+        await newWallet.save(); // Save the wallet to the database
+
+        req.session.User = savedUser._id; // Store user ID in the session
         res.status(200).json({ success: true, redirectUrl: "/login" });
       } catch (dbError) {
-        console.error("Error saving user data:", dbError); // Log database errors
-        res.status(500).json({ success: false, message: "Could not create user" });
+        console.error("Error saving user or wallet data:", dbError); // Log database errors
+        res.status(500).json({ success: false, message: "Could not create user or wallet" });
       }
     } else {
-  res.status(400).json();
-}
+      res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
   } catch (error) {
     console.error("Error in OTP verification:", error);
-    res.status(500).json({ success: false, message: "An Error occurred" });
+    res.status(500).json({ success: false, message: "An error occurred" });
   }
 };
 const resendOtp = async (req, res) => {

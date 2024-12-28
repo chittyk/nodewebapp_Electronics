@@ -17,6 +17,7 @@ const orderController =require("../controllers/admin/orderController");
 const salesReportController=require("../controllers/admin/salesReportController")
 const pdfController =require('../controllers/admin/pdfController')
 const ExcelJS = require('exceljs');
+const walletController=require('../controllers/admin/walletController')
 
 //pageNotFound
 router.get("/pageNotFound",adminAuth,adminController.pageNotFound)
@@ -96,5 +97,9 @@ router.get("/salesReport",adminAuth,salesReportController.getSalesReport)
 
 router.get('/generate-pdf',adminAuth,pdfController.createPdf)
 
+
+//wallet
+router.get('/wallet',adminAuth,walletController.getWallet)
+router.post('/addMoney',adminAuth,walletController.addMoney)
 
 module.exports = router;

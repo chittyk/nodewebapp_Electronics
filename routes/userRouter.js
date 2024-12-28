@@ -100,15 +100,15 @@ router.post('/reset-password',profileController.postNewPassword)
 
 
 
-
+  
 //shopping page
-router.get('/shop',userAuth,userController.loadShop)
-router.get('/filter',userAuth,userController.filterProduct)
-router.get('/filterPrice',userAuth,userController.filterPrice)
+router.get('/shop',userController.loadShop)
+router.get('/filter',userController.filterProduct)
+router.get('/filterPrice',userController.filterPrice)
 // router.post('/search',userAuth,userController.searchProduct)
-router.get('/sort', userAuth, userController.sortProduct);
-router.get('/detailProduct',userAuth,userController.detailProduct)
-router.get('/advancedSearch', userAuth, userController.advancedSearch);
+router.get('/sort', userController.sortProduct);
+router.get('/detailProduct',userController.detailProduct)
+router.get('/advancedSearch', userController.advancedSearch);
 
 
 //wishlist management
@@ -223,6 +223,8 @@ router.post('/returnOrder',userAuth,cartController.returnOrder)
 router.post('/cancellReturnOrder',userAuth,cartController.cancellReturnOrder)
 router.get('/orderDetails',userAuth,cartController.orderDetails)
 router.get('/orderDetails1',userAuth,cartController.orderDetails1)
+
+
 
 //coupon management
 router.post('/checkCoupon',userAuth,couponController.checkCoupon)

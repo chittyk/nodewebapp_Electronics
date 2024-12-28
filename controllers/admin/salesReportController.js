@@ -18,7 +18,8 @@ const getSalesReport = async (req, res) => {
         const totalOrders = await Orders.countDocuments({});
 
         // Fetch orders with pagination
-        let orders = await Orders.find({})
+        let orders = await Orders.find({}).sort({ createdOn: -1 });
+
         let = filteredOrders = []
         var salesReport = []
         let salesprice1 = 0
@@ -371,14 +372,14 @@ const getSalesReport = async (req, res) => {
             `            // orders = orders.skip(skip).limit(limit);
 `        }
 
-        const salesData =[]
+        const salesData = []
 
         orders.forEach(order => {
-            if(order.status==="Delivered"){
-                let data={
-                    date:order.createdOn,
+            if (order.status === "Delivered") {
+                let data = {
+                    date: order.createdOn,
 
-                }                
+                }
             }
         });
 
@@ -390,8 +391,8 @@ const getSalesReport = async (req, res) => {
         const paginatedSalesReport = salesReport.slice(skip, skip + limit);
         // Render the view with pagination data
         res.render('sales-report', {
-            salesReport:  salesReport,
-            salesReport1:JSON.stringify(salesReport),
+            salesReport: salesReport,
+            salesReport1: JSON.stringify(salesReport),
             orders,
             currentPage: page,
             totalPages,

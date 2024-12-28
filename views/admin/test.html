@@ -3,73 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ledger Book</title>
+    <title>My Wallet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+        .gradient-card {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            color: white;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .transaction-item {
+            transition: all 0.3s ease;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+        .transaction-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
     </style>
 </head>
-<body>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- Balance Card -->
+        <div class="card gradient-card mb-4">
+            <div class="card-body p-4">
+                <h4 class="mb-3">My Wallet</h4>
+                <h2 class="display-5 mb-4">$1,234.56</h2>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-light w-100">
+                            Receive Money
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100">
+                            Send Money
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <h1>Ledger Book</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2023-01-01</td>
-                <td>Initial Deposit</td>
-                <td>$0.00</td>
-                <td>$1000.00</td>
-                <td>$1000.00</td>
-            </tr>
-            <tr>
-                <td>2023-01-05</td>
-                <td>Office Supplies</td>
-                <td>$200.00</td>
-                <td>$0.00</td>
-                <td>$800.00</td>
-            </tr>
-            <tr>
-                <td>2023-01-10</td>
-                <td>Client Payment</td>
-                <td>$0.00</td>
-                <td>$500.00</td>
-                <td>$1300.00</td>
-            </tr>
-            <tr>
-                <td>2023-01-15</td>
-                <td>Utilities</td>
-                <td>$150.00</td>
-                <td>$0.00</td>
-                <td>$1150.00</td>
-            </tr>
-        </tbody>
-    </table>
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="send-tab" data-bs-toggle="tab" data-bs-target="#send" type="button">
+                    Send Money
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
+                    Transaction History
+                </button>
+            </li>
+        </ul>
 
+        <!-- Tab Contents -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Send Money Tab -->
+            <div class="tab-pane fade show active" id="send" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Send Money</h5>
+                        <form id="sendForm">
+                            <div class="mb-3">
+                                <label class="form-label">Recipient Address</label>
+                                <input type="text" class="form-control" id="recipientAddress" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="amount" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Send Money</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History Tab -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Recent Transactions</h5>
+                        <!-- Transaction Items -->
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-success bg-opacity-10 me-3">
+                                        <span class="text-success">↓</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Received from John</h6>
+                                        <small class="text-muted">Dec 28, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-success">+$500.00</div>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-danger bg-opacity-10 me-3">
+                                        <span class="text-danger">↑</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Sent to Sarah</h6>
+                                        <small class="text-muted">Dec 27, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-danger">-$150.00</div>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-danger bg-opacity-10 me-3">
+                                        <span class="text-danger">↑</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Sent to Mike</h6>
+                                        <small class="text-muted">Dec 26, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-danger">-$75.00</div>
+                                        <small class="text-muted">Pending</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle form submission
+        document.getElementById('sendForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('amount').value;
+            const recipient = document.getElementById('recipientAddress').value;
+
+            if (amount && recipient) {
+                alert(`Transaction successful!\nSent $${amount} to ${recipient}`);
+                this.reset();
+            }
+        });
+
+        // Initialize Bootstrap tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
 </body>
 </html>

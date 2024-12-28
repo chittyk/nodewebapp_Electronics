@@ -1,327 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced E-commerce Admin Dashboard</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Additional Plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <!-- Axios for AJAX requests -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- Feather Icons -->
-    <script src="https://unpkg.com/feather-icons"></script>
+    <title>My Wallet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --gradient-dark: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            --card-dark-bg: #2d2d2d;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        .gradient-card {
+            background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+            color: white;
+        }
+
+        .dark-card {
+            background-color: var(--card-dark-bg);
+            border: 1px solid #404040;
+        }
+
+        .transaction-item {
+            transition: all 0.3s ease;
+            background-color: var(--card-dark-bg);
+            border: 1px solid #404040;
+        }
+
+        .transaction-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .nav-tabs {
+            border-bottom-color: #404040;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: var(--card-dark-bg);
+            border-color: #404040;
+            color: #fff;
+        }
+
+        .nav-tabs .nav-link:not(.active) {
+            color: #909090;
+        }
+
+        .form-control, .input-group-text {
+            background-color: #333;
+            border-color: #404040;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            background-color: #404040;
+            border-color: #4f46e5;
+            color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #909090;
+        }
+
+        .text-muted {
+            color: #909090 !important;
+        }
+
+        .btn-light {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-light:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold">E-commerce Admin Dashboard</h1>
-            <div class="flex space-x-4">
-                <select id="globalTimePeriod" class="form-select px-4 py-2 border rounded">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly" selected>Monthly</option>
-                    <option value="yearly">Yearly</option>
-                </select>
-            </div>
-        </div>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="btn btn-outline-light theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌞</span>
+    </button>
 
-        <!-- Key Performance Indicators -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
-                <div class="mr-4">
-                    <i data-feather="dollar-sign" class="text-green-500 w-12 h-12"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500">Total Revenue</p>
-                    <p id="totalRevenue" class="text-2xl font-bold">$0</p>
-                    <p id="revenueGrowth" class="text-sm text-green-600">+0%</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
-                <div class="mr-4">
-                    <i data-feather="shopping-cart" class="text-blue-500 w-12 h-12"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500">Total Orders</p>
-                    <p id="totalOrders" class="text-2xl font-bold">0</p>
-                    <p id="ordersGrowth" class="text-sm text-green-600">+0%</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
-                <div class="mr-4">
-                    <i data-feather="users" class="text-purple-500 w-12 h-12"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500">New Customers</p>
-                    <p id="newCustomers" class="text-2xl font-bold">0</p>
-                    <p id="customerGrowth" class="text-sm text-green-600">+0%</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
-                <div class="mr-4">
-                    <i data-feather="trending-up" class="text-orange-500 w-12 h-12"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500">Conversion Rate</p>
-                    <p id="conversionRate" class="text-2xl font-bold">0%</p>
-                    <p id="conversionGrowth" class="text-sm text-green-600">+0%</p>
+    <div class="container py-4">
+        <!-- Balance Card -->
+        <div class="card gradient-card mb-4">
+            <div class="card-body p-4">
+                <h4 class="mb-3">My Wallet</h4>
+                <h2 class="display-5 mb-4">$1,234.56</h2>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-light w-100">
+                            Receive Money
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100">
+                            Send Money
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sales and Revenue Charts -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Sales Trends</h2>
-                <canvas id="salesChart"></canvas>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Revenue Trends</h2>
-                <canvas id="revenueChart"></canvas>
-            </div>
-        </div>
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="send-tab" data-bs-toggle="tab" data-bs-target="#send" type="button">
+                    Send Money
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
+                    Transaction History
+                </button>
+            </li>
+        </ul>
 
-        <!-- Top Performing Sections -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Top 10 Products -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Top 10 Best Selling Products</h2>
-                <canvas id="topProductsChart"></canvas>
-            </div>
-
-            <!-- Top 10 Categories -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Top 10 Categories</h2>
-                <canvas id="topCategoriesChart"></canvas>
-            </div>
-
-            <!-- Top 10 Brands -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Top 10 Brands</h2>
-                <canvas id="topBrandsChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Optional: Ledger Book Section -->
-        <div class="bg-white p-6 rounded-lg shadow-md mt-8">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Ledger Book</h2>
-                <div class="flex space-x-2">
-                    <button id="generateLedgerBtn" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Generate Ledger
-                    </button>
-                    <button id="downloadLedgerBtn" class="px-4 py-2 bg-green-500 text-white rounded">
-                        Download PDF
-                    </button>
+        <!-- Tab Contents -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Send Money Tab -->
+            <div class="tab-pane fade show active" id="send" role="tabpanel">
+                <div class="card dark-card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Send Money</h5>
+                        <form id="sendForm">
+                            <div class="mb-3">
+                                <label class="form-label">Recipient Address</label>
+                                <input type="text" class="form-control" id="recipientAddress" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="amount" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Send Money</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <div id="ledgerContent" class="overflow-x-auto">
-                <!-- Ledger content will be dynamically populated -->
+
+            <!-- Transaction History Tab -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <div class="card dark-card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Recent Transactions</h5>
+                        <!-- Transaction Items -->
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-success bg-opacity-10 me-3">
+                                        <span class="text-success">↓</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Received from John</h6>
+                                        <small class="text-muted">Dec 28, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-success">+$500.00</div>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-danger bg-opacity-10 me-3">
+                                        <span class="text-danger">↑</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Sent to Sarah</h6>
+                                        <small class="text-muted">Dec 27, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-danger">-$150.00</div>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-danger bg-opacity-10 me-3">
+                                        <span class="text-danger">↑</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Sent to Mike</h6>
+                                        <small class="text-muted">Dec 26, 2024</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-danger">-$75.00</div>
+                                        <small class="text-muted">Pending</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Chart Configuration and Data Fetching
-            const globalTimePeriod = document.getElementById('globalTimePeriod');
-            let salesChart, revenueChart, topProductsChart, topCategoriesChart, topBrandsChart;
+        // Handle form submission
+        document.getElementById('sendForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('amount').value;
+            const recipient = document.getElementById('recipientAddress').value;
 
-            // Utility function for creating charts
-            function createBarChart(ctx, labels, data, title, colors) {
-                return new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: title,
-                            data: data,
-                            backgroundColor: colors || 'rgba(54, 162, 235, 0.6)',
-                            borderColor: colors ? colors.map(c => c.replace('0.6', '1')) : 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    plugins: [ChartDataLabels],
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            datalabels: {
-                                color: 'black',
-                                display: true,
-                                anchor: 'end',
-                                align: 'end',
-                                formatter: function(value) {
-                                    return value;
-                                }
-                            },
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
+            if (amount && recipient) {
+                alert(`Transaction successful!\nSent $${amount} to ${recipient}`);
+                this.reset();
             }
+        });
 
-            // Fetch and Render Dashboard Data
-            async function fetchDashboardData(period) {
-                try {
-                    // Simulate data fetch - replace with actual API call
-                    const response = await axios.get(`/api/dashboard?period=${period}`);
-                    const data = response.data;
-
-                    // Update KPIs
-                    document.getElementById('totalRevenue').textContent = data.totalRevenue;
-                    document.getElementById('revenueGrowth').textContent = data.revenueGrowth;
-                    document.getElementById('totalOrders').textContent = data.totalOrders;
-                    document.getElementById('ordersGrowth').textContent = data.ordersGrowth;
-                    document.getElementById('newCustomers').textContent = data.newCustomers;
-                    document.getElementById('customerGrowth').textContent = data.customerGrowth;
-                    document.getElementById('conversionRate').textContent = data.conversionRate;
-                    document.getElementById('conversionGrowth').textContent = data.conversionGrowth;
-
-                    // Update Sales Chart
-                    salesChart.data.labels = data.salesTrends.labels;
-                    salesChart.data.datasets[0].data = data.salesTrends.data;
-                    salesChart.update();
-
-                    // Update Revenue Chart
-                    revenueChart.data.labels = data.revenueTrends.labels;
-                    revenueChart.data.datasets[0].data = data.revenueTrends.data;
-                    revenueChart.update();
-
-                    // Update Top Products Chart
-                    topProductsChart.data.labels = data.topProducts.labels;
-                    topProductsChart.data.datasets[0].data = data.topProducts.data;
-                    topProductsChart.update();
-
-                    // Update Top Categories Chart
-                    topCategoriesChart.data.labels = data.topCategories.labels;
-                    topCategoriesChart.data.datasets[0].data = data.topCategories.data;
-                    topCategoriesChart.update();
-
-                    // Update Top Brands Chart
-                    topBrandsChart.data.labels = data.topBrands.labels;
-                    topBrandsChart.data.datasets[0].data = data.topBrands.data;
-                    topBrandsChart.update();
-
-                } catch (error) {
-                    console.error('Error fetching dashboard data:', error);
-                }
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            
+            if (isDark) {
+                html.setAttribute('data-bs-theme', 'light');
+                document.body.style.backgroundColor = '#f8f9fa';
+                themeIcon.textContent = '🌙';
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                document.body.style.backgroundColor = '#1a1a1a';
+                themeIcon.textContent = '🌞';
             }
+        }
 
-            // Initialize Charts
-            function initializeCharts() {
-                // Sales Trends Chart
-                salesChart = createBarChart(
-                    document.getElementById('salesChart').getContext('2d'),
-                    [],
-                    [],
-                    'Sales Trends'
-                );
-
-                // Revenue Trends Chart
-                revenueChart = createBarChart(
-                    document.getElementById('revenueChart').getContext('2d'),
-                    [],
-                    [],
-                    'Revenue Trends'
-                );
-
-                // Top Products Chart
-                topProductsChart = createBarChart(
-                    document.getElementById('topProductsChart').getContext('2d'),
-                    [],
-                    [],
-                    'Top Products',
-                    [
-                        'rgba(255, 99, 132, 0.6)', 
-                        'rgba(54, 162, 235, 0.6)', 
-                        'rgba(255, 206, 86, 0.6)', 
-                        'rgba(75, 192, 192, 0.6)', 
-                        'rgba(153, 102, 255, 0.6)'
-                    ]
-                );
-
-                // Top Categories Chart
-                topCategoriesChart = createBarChart(
-                    document.getElementById('topCategoriesChart').getContext('2d'),
-                    [],
-                    [],
-                    'Top Categories',
-                    [
-                        'rgba(255, 159, 64, 0.6)', 
-                        'rgba(54, 162, 235, 0.6)', 
-                        'rgba(255, 206, 86, 0.6)', 
-                        'rgba(75, 192, 192, 0.6)', 
-                        'rgba(153, 102, 255, 0.6)'
-                    ]
-                );
-
-                // Top Brands Chart
-                topBrandsChart = createBarChart(
-                    document.getElementById('topBrandsChart').getContext('2d'),
-                    [],
-                    [],
-                    'Top Brands',
-                    [
-                        'rgba(199, 199, 199, 0.6)', 
-                        'rgba(54, 162, 235, 0.6)', 
-                        'rgba(255, 206, 86, 0.6)', 
-                        'rgba(75, 192, 192, 0.6)', 
-                        'rgba(153, 102, 255, 0.6)'
-                    ]
-                );
-            }
-
-            // Ledger Generation
-            document.getElementById('generateLedgerBtn').addEventListener('click', async () => {
-                try {
-                    const response = await axios.get('/api/generate-ledger');
-                    const ledgerContent = document.getElementById('ledgerContent');
-                    ledgerContent.innerHTML = response.data;
-                } catch (error) {
-                    console.error('Error generating ledger:', error);
-                }
-            });
-
-            // Download Ledger
-            document.getElementById('downloadLedgerBtn').addEventListener('click', async () => {
-                try {
-                    const response = await axios.get('/api/download-ledger', {
-                        responseType: 'blob'
-                    });
-                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', 'ledger.pdf');
-                    document.body.appendChild(link);
-                    link.click();
-                } catch (error) {
-                    console.error('Error downloading ledger:', error);
-                }
-            });
-
-            // Time Period Change Event
-            globalTimePeriod.addEventListener('change', () => {
-                fetchDashboardData(globalTimePeriod.value);
-            });
-
-            // Initialize everything
-            initializeCharts();
-            fetchDashboardData('monthly'); // Default to monthly view
-            feather.replace(); // Replace icons
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     </script>
 </body>
