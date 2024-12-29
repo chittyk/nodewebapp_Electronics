@@ -7,7 +7,7 @@ const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderSchema")
 const mongoose = require('mongoose')
 const Coupon=require('../../models/couponSchema')
-
+const Wallet = require("../../models/walletSchema");
 const Razorpay = require('razorpay');
 
 
@@ -382,7 +382,14 @@ const postConfirmOrder = async (req, res) => {
         console.log("userid ", userId)
         const user = await User.findOne({ _id: userId });
         console.log('session cart ',req.session.cart)
-        const { addressIds, totalPrice, items, product, selectedOption,razorpay_order_id } = req.body;
+        let { addressIds, totalPrice, items, product, selectedOption,razorpay_order_id } = req.body;
+        let wallet = await Wallet.findOne({userId:user})
+        if(selectedOption==="emi"){
+            selectedOption ="DE Wallet"
+            if(totalPrice > wallet.balance ){
+                return res.status(500).json({ success: false, message: "Insufficient balance in wallet" });
+            }
+        }
         console.log("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",items,"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",product)
         if(product.productName){
             return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -492,6 +499,20 @@ const postConfirmOrder = async (req, res) => {
             { _id: user },
             { $push: { orderHistory: order._id } }
         )
+
+        if(selectedOption === "DE Wallet"){
+            
+            wallet.balance = wallet.balance-totalPrice
+            let transacions ={
+                transactionType:"debit",
+                amount:totalPrice,
+                date:new Date(),
+                description: "orderId"+order.orderId
+
+            }
+            wallet.transactions.push(transacions)
+            await wallet.save()
+        }
 
 
         return res.status(200).json({ success: true, message: 'Order placed successfully', order });

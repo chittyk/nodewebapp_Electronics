@@ -380,78 +380,148 @@
 
                       <div class="tab-pane fade" id="wallet-status" role="tabpanel">
                         <div class="col-lg-9">
-                        <div class="tab-content">
-                            <!-- Wallet Status Tab -->
-                            <div class="tab-pane fade show active" id="wallet-status" role="tabpanel">
-                                <!-- Balance Card -->
-                                <div class="card gradient-card mb-4">
-                                    <div class="card-body p-4">
-                                        <h4 class="mb-3">My Wallet</h4>
-                                        <div class="wallet-balance">$1,234.56</div>
-                                        <div class="row g-2">
-                                            <div class="col-6">
-                                                <button class="btn btn-light w-100">
-                                                    <i class="bi bi-download me-2"></i>Receive
-                                                </button>
-                                            </div>
-                                            <div class="col-6">
-                                                <button class="btn btn-light w-100">
-                                                    <i class="bi bi-send me-2"></i>Send
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+    <div class="tab-content">
+        <!-- Wallet Status Tab -->
+        <div class="tab-pane fade show active" id="wallet-status" role="tabpanel">
+    <!-- Balance Card -->
+    <div class="card gradient-card mb-4">
+        <div class="card-body p-4">
+            <h4 class="mb-3">My Wallet</h4>
+            <% if (userWallet && userWallet.balance >= 0) { %>
+                <div class="wallet-balance fs-2">₹ <%= userWallet.balance.toFixed(2) %></div>
+            <% } else { %>
+                <div class="wallet-balance text-muted">No Wallet Balance Available</div>
+            <% } %>
+            <div class="row g-2 mt-3">
+                <div class="col-6">
+                    <button class="btn btn-light w-100">
+                        <i class="bi bi-download me-2"></i>Receive
+                    </button>
+                </div>
+                <!-- Add Money Button -->
+                <div class="col-6">
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
+                        <i class="bi bi-plus me-2"></i>Add Money
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>  
 
-                                <!-- Transaction History -->
-                                <div class="card dark-card">
-                                    <div class="card-header">
-                                        <h5 class="mb-0">Recent Transactions</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <!-- Transaction Items -->
-                                        <div class="transaction-item">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="icon-circle bg-success bg-opacity-10 me-3">
-                                                        <i class="bi bi-arrow-down-left text-success"></i>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">Received from John</h6>
-                                                        <small class="text-muted">Dec 28, 2024</small>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="text-success">+$500.00</div>
-                                                        <small class="text-muted">Completed</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="transaction-item">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="icon-circle bg-danger bg-opacity-10 me-3">
-                                                        <i class="bi bi-arrow-up-right text-danger"></i>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">Sent to Sarah</h6>
-                                                        <small class="text-muted">Dec 27, 2024</small>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="text-danger">-$150.00</div>
-                                                        <small class="text-muted">Completed</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+    <!-- Transaction History -->
+    <div class="card dark-card">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Transactions</h5>
+        </div>
+        <div class="card-body">
+            <% if (transactions && transactions.length > 0) { %>
+                <% transactions.forEach(transaction => { %>
+                    <div class="transaction-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <!-- Transaction Icon -->
+                            <div class="icon-circle <%= transaction.transactionType === 'credit' ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10' %> me-3">
+                                <i class="bi <%= transaction.transactionType === 'credit' ? 'bi-arrow-down-left text-success' : 'bi-arrow-up-right text-danger' %>"></i>
                             </div>
-
-                            <!-- Keep other existing tab panes -->
+                            <!-- Transaction Details -->
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0"><%= transaction.description || 'Transaction' %></h6>
+                                <small class="text-muted"><%= new Date(transaction.date).toLocaleDateString() %></small>
+                            </div>
+                            <!-- Transaction Amount -->
+                            <div class="text-end">
+                                <div class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                    <%= transaction.transactionType === 'credit' ? '+' : '-' %>₹ <%= transaction.amount.toFixed(2) %>
+                                </div>
+                                <small class="text-muted">Completed</small>
+                            </div>
                         </div>
                     </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted">No transactions available.</p>
+            <% } %>
+
+            <!-- Pagination Controls -->
+            <nav aria-label="Transaction pagination">
+                <ul class="pagination justify-content-center mt-4">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal to Add Money -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMoneyModalLabel">Add Money</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="amount">Enter Amount:</label>
+                <input style="width: 100%;" type="number" class="form-control" id="amount" name="amount" required min="1" step="0.01" placeholder="Enter amount">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addMoney()">Add Money</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Modal for Add Money -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group bg-white">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control shadow-sm border-primary" id="amount" name="amount" required min="1" step="0.01" placeholder="Enter amount">
+
+<!-- Custom CSS -->
+<style>
+    #amount::placeholder {
+        color: white !important;
+    }
+</style>
+                        </div>
+                        <div class="form-text">Enter the amount you want to add to your wallet.</div>
+                    </div>
+                    <button type="submit" onclick="addMoney()" class="btn btn-primary w-100 mt-3">Add Money</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
                       </div>
 
                       <div class="tab-pane fade" id="referrals" role="tabpanel">
@@ -476,8 +546,89 @@
 
 
 
+  
+<script>
+  
+  
+  function addMoney() {
+    // Get the amount entered by the user
+    const amount = parseFloat(document.getElementById('amount').value);
+    
+    // Get the amount input field
+    const amountField = document.getElementById('amount');
+    
+    // Check if the amount is valid (between 200 and 5000)
+    if (amount >= 200 && amount <= 5000) {
+        // Show an alert to confirm that the money has been added
+        // alert('Amount added: ₹' + amount);
+        
+        // Optionally, update the wallet balance here (if needed)
+        // Example: updateWalletBalance(amount);
+        
+        // Display the added amount in the field
+        amountField.value = amount;
+        
+        // Clear any previous error messages
+        amountField.classList.remove('is-invalid');
+        const errorMessage = amountField.nextElementSibling;
+        if (errorMessage) {
+            errorMessage.remove();
+        }
 
 
+        $.ajax({
+          type: "POST",
+          url: "/addMoney",  // The request type is POST
+          data: {amount: amount},
+          success: function(data) {
+            console.log(data);
+            Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "Amount successfully added",
+              showConfirmButton: false,
+              timer: 1500
+            });
+            location.reload()
+          },
+          error: function( error) {
+              console.log(error);
+              Swal.fire({
+                position: "top-end",
+                icon: "error",
+                title: "Error in adding amount",
+                showConfirmButton: false,
+                timer: 1500
+              });
+          }
+              
+          
+        })
+
+
+        // Close the modal after adding money
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addMoneyModal'));
+        modal.hide();
+    } else {
+        // Show an error message if the amount is invalid (out of range)
+        amountField.classList.add('is-invalid'); // Add invalid class to input field
+        
+        // Display custom error message
+        let errorMessage = amountField.nextElementSibling;
+        if (!errorMessage) {
+            errorMessage = document.createElement('div');
+            errorMessage.classList.add('invalid-feedback');
+            amountField.parentNode.appendChild(errorMessage);
+        }
+        errorMessage.textContent = 'Please enter a valid amount between ₹200 and ₹5000.';
+    }
+}
+
+
+  
+  </script>
+  
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 

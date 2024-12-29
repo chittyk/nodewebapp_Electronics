@@ -67,7 +67,7 @@
         },
         paymentMethod:{
             type:String,
-            enum:['card','net-banking','upi','emi','cod','razorpay'],
+            enum:['card','net-banking','upi','emi','cod','razorpay',"DE Wallet"],
             default:'cod'
         },
         RazorpayOrderId:{

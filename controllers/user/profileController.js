@@ -8,7 +8,7 @@ const session =require('express-session');
 const { render } = require("ejs");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
-
+const Wallet =require('../../models/walletSchema')
 
 render
 function generateOtp() {
@@ -199,32 +199,49 @@ const postNewPassword =async (req,res) => {
         res.redirect('/pageNotFound')
     }
 }
-
 const getuserProfile = async (req, res) => {
     try {
         const userId = req.session.user;
-        const addressData = await Address.findOne({ userId: userId });
-        
-        // Fetch user data based on _id
+
+        // Fetch user's address data
+        const addressData = await Address.findOne({ userId });
+
+        // Fetch user data
         const userData = await User.findOne({ _id: userId });
 
-        // Fetch and sort orders by the creation date in descending order (newest first)
-        const orders = await Order.find({ userId: userId }).sort({ createdOn: -1 }); // Sort by 'createdOn' field, descending order
-        const product = await Product.find({});
-        
-        console.log('orders from profile', orders);
+        // Fetch wallet data and sort transactions by date in descending order
+        const userWallet = await Wallet.findOne({ userId });
+        const transactionsPerPage = 5; // Number of transactions per page
+        const currentPage = parseInt(req.query.page) || 1; // Get the page from query, default to 1
 
+        // Extract paginated transactions
+        const paginatedTransactions = userWallet.transactions
+            .sort((a, b) => b.date - a.date) // Sort by date descending
+            .slice((currentPage - 1) * transactionsPerPage, currentPage * transactionsPerPage);
+
+        // Fetch and sort orders by the creation date in descending order
+        const orders = await Order.find({ userId }).sort({ createdOn: -1 });
+
+        // Fetch all products
+        const product = await Product.find({});
+
+        // Render profile view
         res.render('profile', {
+            userWallet,
             userData,
-            product: product,
-            orders: orders,
+            product,
+            orders,
             userAddress: addressData,
+            transactions: paginatedTransactions, // Pass paginated transactions
+            currentPage, // Current page for rendering pagination controls
+            totalPages: Math.ceil(userWallet.transactions.length / transactionsPerPage) // Calculate total pages
         });
     } catch (error) {
         console.log('Error in profile gathering:', error);
         res.redirect('/pageNotFound');
     }
 };
+
 
 
 const changeEmail = async (req, res) => {

@@ -35,9 +35,11 @@ const cartController =require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
 const couponController=require("../controllers/user/couponController")
 const aboutController=require("../controllers/user/aboutController")
+const walletController=require("../controllers/user/walletController")
 
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
+const { rotate } = require('pdfkit');
 
 const razorpay = new Razorpay({
     key_id: 'rzp_test_D64ckPQSXSWgra',
@@ -224,6 +226,11 @@ router.post('/cancellReturnOrder',userAuth,cartController.cancellReturnOrder)
 router.get('/orderDetails',userAuth,cartController.orderDetails)
 router.get('/orderDetails1',userAuth,cartController.orderDetails1)
 
+
+
+//Wallet Management
+
+router.post('/addMoney', userAuth, walletController.addMoney);
 
 
 //coupon management

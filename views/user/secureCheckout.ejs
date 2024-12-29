@@ -151,7 +151,20 @@
                                                     doorstep.</p>
                                             </div>
                                         </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="radio" name="payment-method" id="emi"
+                                                value="emi" checked>
 
+                                            <label class="form-check-label" for="emi">
+                                                Wallet payment
+                                            </label>
+                                            <div class="text-muted">pay with wallet</div>
+                                            <div class="mt-3 p-3 bg-light border rounded d-none" id="emi-options">
+                                                <p>No advance payment needed.
+                                                    Pay securely at your
+                                                    doorstep.</p>
+                                            </div>
+                                        </div>
 
                                     </form>
 
@@ -418,12 +431,12 @@
                     
                 }else{
                     console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",selectedOption.value)
-                    if(selectedOption.value === 'cod'){
+                    if(selectedOption.value === 'cod' || selectedOption.value === 'emi') {
                                                 
                         if(totalPrice>1000){
                             Swal.fire({
                                 title: "Not Avalilable",
-                                text: "Cash on Delivery only available for under ₹1000 order",
+                                text: "This payment method only available for under ₹1000 order",
                                 icon: "info"
                             });
                         }else{
