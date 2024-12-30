@@ -441,7 +441,7 @@ const loadHomepage = async (req, res) => {
       console.log('userData is  :\n', userData);
       console.log('product is  :\n', productData);
       console.log('banner :\n', findBanner)
-      return res.render("home", { userData, productData, banner: findBanner || [] });
+      return res.render("home", { userData, productData, banner: findBanner});
     } else {
       console.log('banner :\n', findBanner)
 
